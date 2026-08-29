@@ -30,7 +30,7 @@ test("server-renders the RMB finance tracker", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>钱途花园｜实习期个人资产与定投计划<\/title>/i);
-  assert.match(html, /本地保存 · 北京时间 · 人民币/);
+  assert.match(html, /仅此浏览器(?:<!-- -->)? · 北京时间 · 人民币/);
   assert.match(html, /日期（北京时间）/);
   assert.match(html, /金额（人民币元）/);
   assert.match(html, /导出完整 CSV/);
@@ -46,11 +46,17 @@ test("keeps financial data device-local with explicit locale metadata", async ()
 
   assert.match(page, /localStorage\.getItem/);
   assert.match(page, /localStorage\.setItem/);
-  assert.doesNotMatch(page, /fetch\s*\(/);
+  assert.match(page, /http:\/\/127\.0\.0\.1:43128\/v1\/state/);
+  assert.match(page, /http:\/\/localhost:3000/);
+  assert.match(page, /本机已同步/);
   assert.match(page, /TIME_ZONE = "Asia\/Shanghai"/);
   assert.match(page, /CURRENCY_CODE = "CNY"/);
   assert.match(page, /\+ 添加账户/);
   assert.match(page, /如：浦发银行/);
+  assert.match(page, /tone: item\.tone \|\| tones\[index % tones\.length\]/);
+  assert.match(page, /latestPricedTrade/);
+  assert.match(page, /priceIsEstimated/);
+  assert.match(page, /最近成交价/);
   assert.doesNotMatch(page, /7956|8259|4827/);
   assert.equal(hostingConfig.d1, null);
   assert.equal(hostingConfig.r2, null);

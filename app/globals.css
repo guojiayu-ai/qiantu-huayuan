@@ -13,6 +13,8 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .simple-nav strong { font-size:18px; }
 .simple-nav span { color:#5f5953; font-size:12px; font-weight:650; }
 .simple-nav .privacy-badge { padding:5px 9px; border-radius:999px; background:#e9f5ef; color:var(--green); font-size:11px; font-weight:800; }
+.simple-nav .privacy-badge.sync-connecting { background:#fff4cf; color:#745c0d; }
+.simple-nav .privacy-badge.sync-offline, .simple-nav .privacy-badge.sync-browser-only { background:#fff0ed; color:var(--red); }
 .nav-right { display:flex; align-items:center; gap:10px; }
 .nav-right label { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:10px; }
 .nav-right input, .nav-right button { height:34px; border-radius:9px; }
@@ -144,6 +146,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .category-columns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
 .category-columns>div>strong { font-size:10px; }
 .backup-card p { margin:0 0 12px; color:var(--muted); font-size:10px; }
+.backup-card p strong { color:var(--ink); font-weight:850; }
 .backup-card>div { display:flex; gap:7px; }
 .backup-card button { height:34px; border-radius:8px; }
 .undo-toast { position:fixed; left:50%; bottom:24px; z-index:20; transform:translateX(-50%); display:flex; align-items:center; gap:12px; padding:10px 12px 10px 16px; border-radius:999px; background:var(--ink); color:#fff; box-shadow:0 12px 35px rgba(0,0,0,.25); font-size:12px; font-weight:750; }
