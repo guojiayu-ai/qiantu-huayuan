@@ -4,16 +4,15 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type EntryType = "收入" | "支出" | "定投";
 type Entry = { id: number; date: string; type: EntryType; category: string; account: string; amount: number; note: string };
-type Account = { name: string; tail: string; balance: number; color: string };
+type Account = { name: string; tail: string; balance: number; tone: string };
 
 const money = new Intl.NumberFormat("zh-CN", { style: "currency", currency: "CNY", maximumFractionDigits: 0 });
 const today = new Date().toISOString().slice(0, 10);
 const starterAccounts: Account[] = [
-  { name: "工商银行", tail: "7956", balance: 0, color: "blue" },
-  { name: "招商银行", tail: "8259", balance: 0, color: "red" },
-  { name: "中国银行", tail: "4827", balance: 0, color: "green" },
+  { name: "工商银行", tail: "7956", balance: 0, tone: "coral" },
+  { name: "招商银行", tail: "8259", balance: 0, tone: "violet" },
+  { name: "中国银行", tail: "4827", balance: 0, tone: "mint" },
 ];
-
 const categories: Record<EntryType, string[]> = {
   收入: ["实习工资", "奖金/补贴", "红包/转账", "兼职", "报销", "其他收入"],
   支出: ["住宿", "餐饮", "交通", "学习/考试", "社交", "娱乐", "服饰", "医疗", "其他支出"],
@@ -25,12 +24,10 @@ function useStoredState<T>(key: string, initial: T) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const raw = localStorage.getItem(key);
-    if (raw) {
-      try { setValue(JSON.parse(raw)); } catch { /* keep defaults */ }
-    }
+    if (raw) try { setValue(JSON.parse(raw)); } catch { /* keep defaults */ }
     setReady(true);
   }, [key]);
-  useEffect(() => { if (ready) localStorage.setItem(key, JSON.stringify(value)); }, [key, value, ready]);
+  useEffect(() => { if (ready) localStorage.setItem(key, JSON.stringify(value)); }, [key, ready, value]);
   return [value, setValue] as const;
 }
 
@@ -41,13 +38,31 @@ export default function Home() {
   const [targetMonths, setTargetMonths] = useStoredState("money-garden-target", 6);
   const [streak, setStreak] = useStoredState("money-garden-streak", 0);
   const [lastCheck, setLastCheck] = useStoredState("money-garden-check", "");
-  const [tab, setTab] = useState<"花园" | "流水" | "计划">("花园");
   const [entryType, setEntryType] = useState<EntryType>("支出");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState(categories.支出[1]);
+  const [category, setCategory] = useState(categories.支出[0]);
   const [account, setAccount] = useState("工商银行 · 7956");
   const [note, setNote] = useState("");
   const [celebrate, setCelebrate] = useState(false);
+  const [dark, setDark] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("money-garden-theme");
+    const next = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setDark(next);
+    document.documentElement.dataset.theme = next ? "dark" : "light";
+  }, []);
+  useEffect(() => {
+    const onScroll = () => setScrollProgress(window.scrollY / Math.max(document.body.scrollHeight - innerHeight, 1));
+    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const observer = new IntersectionObserver((items) => items.forEach((item) => item.isIntersecting && item.target.classList.add("in-view")), { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, []);
 
   const month = today.slice(0, 7);
   const monthEntries = entries.filter((entry) => entry.date.startsWith(month));
@@ -60,134 +75,131 @@ export default function Home() {
   const surplus = income - expense;
   const suggestedInvest = Math.max(0, Math.round(surplus * (emergencyProgress >= 1 ? 0.5 : 0.2)));
   const level = Math.max(1, Math.floor((entries.length + streak * 2) / 5) + 1);
-
   const spending = useMemo(() => {
     const map = new Map<string, number>();
     monthEntries.filter((e) => e.type === "支出").forEach((e) => map.set(e.category, (map.get(e.category) || 0) + e.amount));
     return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
   }, [monthEntries]);
-  const maxSpend = Math.max(...spending.map(([, v]) => v), 1);
+  const maxSpend = Math.max(...spending.map(([, value]) => value), 1);
 
-  function chooseType(type: EntryType) {
-    setEntryType(type);
-    setCategory(categories[type][0]);
-  }
-
+  function burst() { setCelebrate(true); window.setTimeout(() => setCelebrate(false), 1200); }
+  function chooseType(type: EntryType) { setEntryType(type); setCategory(categories[type][0]); }
   function addEntry(event: FormEvent) {
-    event.preventDefault();
-    const numericAmount = Number(amount);
-    if (!numericAmount || numericAmount <= 0) return;
-    const newEntry: Entry = { id: Date.now(), date: today, type: entryType, category, account, amount: numericAmount, note };
-    setEntries([newEntry, ...entries]);
-    setAmount(""); setNote(""); setCelebrate(true);
-    window.setTimeout(() => setCelebrate(false), 1200);
+    event.preventDefault(); const value = Number(amount); if (!value || value <= 0) return;
+    setEntries([{ id: Date.now(), date: today, type: entryType, category, account, amount: value, note }, ...entries]);
+    setAmount(""); setNote(""); burst();
   }
-
   function checkIn() {
     if (lastCheck === today) return;
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    setStreak(lastCheck === yesterday ? streak + 1 : 1);
-    setLastCheck(today);
-    setCelebrate(true);
-    window.setTimeout(() => setCelebrate(false), 1200);
+    setStreak(lastCheck === yesterday ? streak + 1 : 1); setLastCheck(today); burst();
   }
-
+  function toggleTheme() {
+    const next = !dark; setDark(next); document.documentElement.dataset.theme = next ? "dark" : "light";
+    localStorage.setItem("money-garden-theme", next ? "dark" : "light");
+  }
   function exportCsv() {
     const rows = [["日期", "类型", "分类", "账户", "金额", "备注"], ...entries.map((e) => [e.date, e.type, e.category, e.account, String(e.amount), e.note])];
-    const csv = rows.map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(",")).join("\n");
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
-    link.download = `钱途花园-${month}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    const csv = rows.map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(",")).join("\n");
+    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }));
+    link.download = `钱途花园-${month}.csv`; link.click(); URL.revokeObjectURL(link.href);
   }
 
-  return (
-    <main className="shell">
-      {celebrate && <div className="confetti" aria-hidden="true">✦　●　✿　▲　●　✦</div>}
-      <aside className="rail">
-        <div className="brand"><span className="brand-mark">芽</span><div><strong>钱途花园</strong><small>Money Garden</small></div></div>
-        <div className="rail-copy">
-          <p className="eyebrow">实习期 · 个人版</p>
-          <h1>今天也给<br />未来的自己<br /><em>浇点水。</em></h1>
-          <p>不追求完美记账，只要每个月比上个月更了解自己的钱。</p>
+  return <>
+    <div className="grain" aria-hidden="true" />
+    <div className="scroll-progress" aria-hidden="true"><i style={{ transform: `scaleX(${scrollProgress})` }} /></div>
+    {celebrate && <div className="confetti" aria-hidden="true">✦ ● ✿ ▲ ● ✦</div>}
+
+    <header className="nav">
+      <a className="nav-logo" href="#top"><span className="live-dot" />钱途花园 <em>/ Money Garden</em></a>
+      <nav className="nav-links"><a href="#assets">资产</a><a href="#ledger">流水</a><a href="#plan">计划</a></nav>
+      <div className="nav-actions">
+        <button className="theme" onClick={toggleTheme} aria-label="切换深浅色"><span /></button>
+        <button className="pill-button" onClick={checkIn} disabled={lastCheck === today}>{lastCheck === today ? "今日已浇水 ✓" : "今日浇水 +1"}</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section className="hero">
+        <div className="hero-glow" aria-hidden="true" />
+        <div className="hero-inner">
+          <div className="status-chip reveal"><span />实习期 · 个人资产练习中 · Lv.{level}</div>
+          <h1 className="hero-title">
+            <span className="title-line"><span>把每一笔钱</span></span>
+            <span className="title-line"><span>种成<em>未来。</em></span></span>
+          </h1>
+          <p className="hero-sub reveal">不要求完美记账，只需要比昨天更懂自己的钱。</p>
+          <div className="hero-actions reveal"><a className="button solid" href="#ledger">记一笔 →</a><a className="button ghost" href="#plan">看我的定投计划</a></div>
+          <div className="stickers" aria-hidden="true"><span className="sticker one">🌱 连续 {streak} 天</span><span className="sticker two">💰 本月结余 {money.format(surplus)}</span><span className="sticker three">✨ 定投不靠意志力</span></div>
         </div>
-        <nav aria-label="主要页面">
-          {(["花园", "流水", "计划"] as const).map((item) => <button key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}><span>{item === "花园" ? "✿" : item === "流水" ? "↗" : "◎"}</span>{item}</button>)}
-        </nav>
-        <button className="checkin" onClick={checkIn} disabled={lastCheck === today}>{lastCheck === today ? "今日已打卡 ✓" : "今日打卡 +1"}<small>连续 {streak} 天</small></button>
-      </aside>
+        <div className="marquee" aria-hidden="true">{[0, 1].map((copy) => <div className="marquee-track" key={copy}><span>先储蓄</span><b>✳</b><span>再消费</span><b>✳</b><span>留足安全垫</span><b>✳</b><span>长期定投</span><b>✳</b><span>不追热点</span><b>✳</b><span>每月复盘</span><b>✳</b></div>)}</div>
+        <div className="scroll-cue"><span />向下看花园</div>
+      </section>
 
-      <section className="canvas">
-        <header className="topbar">
-          <div><span className="month-chip">{month.replace("-", " / ")}</span><span className="level-chip">Lv.{level} 理财练习生</span></div>
-          <button className="export" onClick={exportCsv}>导出记录 ↗</button>
-        </header>
+      <section className="section" id="assets">
+        <div className="wrap">
+          <p className="eyebrow reveal">01 — MY MONEY MAP</p>
+          <h2 className="section-title reveal">先看清自己的钱，<br />再决定让它去<span className="mark">哪里。</span></h2>
+          <div className="bento">
+            <article className="bento-card summary-card reveal">
+              <span className="card-tag">This month</span><p>本月投前结余</p><strong>{money.format(surplus)}</strong>
+              <div className="summary-row"><span>收入 <b>{money.format(income)}</b></span><span>支出 <b>{money.format(expense)}</b></span><span>定投 <b>{money.format(invested)}</b></span></div>
+            </article>
+            <article className="bento-card growth-card reveal">
+              <span className="card-tag">Safety garden</span><div className="growth-top"><div><p>备用金生长进度</p><strong>{Math.round(emergencyProgress * 100)}%</strong></div><span className="plant-emoji" style={{ transform: `scale(${.72 + emergencyProgress * .38})` }}>🌿</span></div>
+              <div className="meter"><i style={{ width: `${emergencyProgress * 100}%` }} /></div><small>{money.format(balance)} / {money.format(emergencyTarget)}</small>
+            </article>
+            <article className="bento-card action-card reveal"><span className="card-tag">Next move</span><p>建议当月定投</p><strong>{money.format(suggestedInvest)}</strong><p className="muted">{emergencyProgress >= 1 ? "安全垫达标，可以稳定加码。" : "先用结余的 20% 建立习惯。"}</p><a href="#plan">打开行动卡 →</a></article>
+            <article className="bento-card quote-card reveal"><span className="card-tag">A tiny promise</span><p>“工资到账先分配，<em>不是月底剩多少才存多少。</em>”</p><span className="blob" /></article>
+          </div>
 
-        {tab === "花园" && <>
-          <section className="hero-grid reveal">
-            <article className="hero-card lime">
-              <span className="sticker">本月小结</span>
-              <p>投前结余</p><strong>{money.format(surplus)}</strong>
-              <div className="mini-row"><span>收入 {money.format(income)}</span><span>支出 {money.format(expense)}</span></div>
-              <div className="scribble">先照顾当下，再投资未来。</div>
-            </article>
-            <article className="garden-card cream">
-              <div className="plant" style={{ "--growth": `${Math.round(emergencyProgress * 100)}%` } as React.CSSProperties}>
-                <div className="leaf leaf-a" /><div className="leaf leaf-b" /><div className="stem" /><div className="pot">¥</div>
-              </div>
-              <div><p className="eyebrow">安全垫生长中</p><strong>{Math.round(emergencyProgress * 100)}%</strong><p>备用金 {money.format(balance)} / {money.format(emergencyTarget)}</p></div>
-            </article>
-            <article className="target-card cobalt">
-              <span className="sticker yellow">下次行动</span><p>建议当月定投</p><strong>{money.format(suggestedInvest)}</strong><p>{emergencyProgress >= 1 ? "安全垫达标，可以稳定加码" : "先用较小比例建立习惯"}</p>
-              <div className="progress"><i style={{ width: `${suggestedInvest ? Math.min(invested / suggestedInvest, 1) * 100 : 0}%` }} /></div><small>已执行 {money.format(invested)}</small>
-            </article>
-          </section>
+          <div className="section-heading reveal"><div><p className="eyebrow">BANK ACCOUNTS</p><h3>三个账户，一眼看懂</h3></div><strong>合计 {money.format(balance)}</strong></div>
+          <div className="account-grid">
+            {accounts.map((item, index) => <article className={`account-card ${item.tone} reveal`} key={item.tail}><div className="account-head"><span>0{index + 1}</span><i>•• {item.tail}</i></div><h3>{item.name}</h3><label>当前余额<div><span>¥</span><input aria-label={`${item.name}余额`} type="number" value={item.balance || ""} placeholder="0" onChange={(event) => setAccounts(accounts.map((a, i) => i === index ? { ...a, balance: Number(event.target.value) } : a))} /></div></label></article>)}
+          </div>
 
-          <section className="section-head reveal"><div><p className="eyebrow">WALLET PATCH</p><h2>三只口袋</h2></div><p>月底更新一次余额就够了。</p></section>
-          <section className="account-grid reveal">
-            {accounts.map((item, index) => <article className={`bank-card ${item.color}`} key={item.tail}>
-              <div className="bank-top"><span>{index + 1}</span><small>•• {item.tail}</small></div><h3>{item.name}</h3><label>当前余额<input aria-label={`${item.name}余额`} type="number" min="0" value={item.balance || ""} placeholder="0" onChange={(e) => setAccounts(accounts.map((a, i) => i === index ? { ...a, balance: Number(e.target.value) } : a))} /></label>
-            </article>)}
-          </section>
+          <div className="insight-grid">
+            <article className="insight reveal"><div className="section-heading compact"><div><p className="eyebrow">SPENDING SIGNAL</p><h3>钱花去哪儿了</h3></div></div>{spending.length ? <div className="bars">{spending.map(([name, value]) => <div className="bar" key={name}><span>{name}</span><i><b style={{ width: `${(value / maxSpend) * 100}%` }} /></i><strong>{money.format(value)}</strong></div>)}</div> : <div className="empty">记一笔支出，就会长出图表。<span>✿</span></div>}</article>
+            <article className="insight quest-card reveal"><span className="card-tag">Tiny quests</span><h3>本月三件小事</h3>{[[balance > 0, "填完三个账户余额", "看清今天的位置"], [entries.length >= 3, "记满 3 笔流水", `${Math.min(entries.length, 3)} / 3`], [invested > 0, "完成第一笔定投", "金额不必大，先开始"]].map(([done, title, desc]) => <div className={`quest ${done ? "done" : ""}`} key={String(title)}><span>{done ? "✓" : "○"}</span><div><b>{title}</b><small>{desc}</small></div></div>)}</article>
+          </div>
+        </div>
+      </section>
 
-          <section className="lower-grid reveal">
-            <article className="panel spend-panel"><div className="panel-title"><div><p className="eyebrow">SPENDING MAP</p><h2>钱都去哪儿了</h2></div><span>{money.format(expense)}</span></div>
-              {spending.length ? <div className="bars">{spending.map(([name, value], i) => <div className="bar" key={name}><span>{name}</span><i><b style={{ width: `${(value / maxSpend) * 100}%`, animationDelay: `${i * 90}ms` }} /></i><strong>{money.format(value)}</strong></div>)}</div> : <div className="empty">记下一笔支出，这里就会长出图表。<span>↘</span></div>}
-            </article>
-            <article className="panel quest-panel"><p className="eyebrow">MINI QUESTS</p><h2>本月三个小任务</h2>
-              {[{ done: necessary > 0, text: "写下每月必要支出" }, { done: accounts.some((a) => a.balance > 0), text: "更新银行卡余额" }, { done: invested > 0, text: "完成一次不冲动的定投" }].map((q, i) => <div className={`quest ${q.done ? "done" : ""}`} key={q.text}><span>{q.done ? "✓" : i + 1}</span><p>{q.text}<small>{q.done ? "完成，花园经验 +1" : "轻轻一点点，也算前进"}</small></p></div>)}
-            </article>
-          </section>
-        </>}
-
-        {tab === "流水" && <section className="page-section reveal">
-          <div className="section-head"><div><p className="eyebrow">DAILY DROPS</p><h2>一笔一滴，记下来</h2></div><p>银行互转不算收入或支出。</p></div>
-          <div className="ledger-layout">
-            <form className="entry-form" onSubmit={addEntry}>
-              <div className="segmented">{(["收入", "支出", "定投"] as EntryType[]).map((t) => <button type="button" className={entryType === t ? "selected" : ""} onClick={() => chooseType(t)} key={t}>{t}</button>)}</div>
-              <label>金额<div className="money-input"><span>¥</span><input required type="number" min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" /></div></label>
-              <div className="form-row"><label>分类<select value={category} onChange={(e) => setCategory(e.target.value)}>{categories[entryType].map((c) => <option key={c}>{c}</option>)}</select></label><label>账户<select value={account} onChange={(e) => setAccount(e.target.value)}>{accounts.map((a) => <option key={a.tail}>{a.name} · {a.tail}</option>)}</select></label></div>
-              <label>备注（可选）<input value={note} onChange={(e) => setNote(e.target.value)} placeholder="例如：周五和同事吃面" /></label>
-              <button className="primary" type="submit">种下一笔记录 <span>＋</span></button>
+      <section className="section alternate" id="ledger">
+        <div className="wrap">
+          <p className="eyebrow reveal">02 — DAILY DROPS</p>
+          <h2 className="section-title reveal">每一笔都算数，<br />但记账不必<span className="mark mint-mark">痛苦。</span></h2>
+          <div className="ledger-grid">
+            <form className="entry-form reveal" onSubmit={addEntry}>
+              <div className="type-tabs">{(["收入", "支出", "定投"] as EntryType[]).map((type) => <button type="button" className={entryType === type ? "active" : ""} onClick={() => chooseType(type)} key={type}>{type}</button>)}</div>
+              <label>金额<div className="money-input"><span>¥</span><input required type="number" min="0.01" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} placeholder="0.00" /></div></label>
+              <div className="form-row"><label>分类<select value={category} onChange={(event) => setCategory(event.target.value)}>{categories[entryType].map((item) => <option key={item}>{item}</option>)}</select></label><label>账户<select value={account} onChange={(event) => setAccount(event.target.value)}>{accounts.map((item) => <option key={item.tail}>{item.name} · {item.tail}</option>)}</select></label></div>
+              <label>备注（可选）<input value={note} onChange={(event) => setNote(event.target.value)} placeholder="例如：和同事吃面" /></label>
+              <button className="submit" type="submit">种下一笔记录 <span>＋</span></button>
             </form>
-            <article className="panel history"><div className="panel-title"><div><p className="eyebrow">RECENT</p><h2>最近流水</h2></div><span>{entries.length} 笔</span></div>
-              {entries.length ? entries.slice(0, 8).map((e) => <div className="history-row" key={e.id}><span className={`type-dot ${e.type}`}>{e.type === "收入" ? "+" : e.type === "支出" ? "−" : "↗"}</span><div><strong>{e.category}</strong><small>{e.date} · {e.account}{e.note ? ` · ${e.note}` : ""}</small></div><b>{e.type === "收入" ? "+" : "−"}{money.format(e.amount)}</b><button aria-label="删除该记录" onClick={() => setEntries(entries.filter((x) => x.id !== e.id))}>×</button></div>) : <div className="empty tall">第一笔记录，会是花园的第一颗种子。<span>✿</span></div>}
+            <article className="history reveal"><div className="history-head"><div><span className="card-tag">Recent</span><h3>最近流水</h3></div><button onClick={exportCsv}>导出 CSV ↗</button></div>
+              {entries.length ? entries.slice(0, 8).map((item) => <div className="history-row" key={item.id}><span className={`entry-icon ${item.type}`}>{item.type === "收入" ? "+" : item.type === "支出" ? "−" : "↗"}</span><div><b>{item.category}</b><small>{item.date} · {item.account}{item.note ? ` · ${item.note}` : ""}</small></div><strong>{item.type === "收入" ? "+" : "−"}{money.format(item.amount)}</strong><button aria-label="删除这条记录" onClick={() => setEntries(entries.filter((entry) => entry.id !== item.id))}>×</button></div>) : <div className="empty tall">第一笔记录，会是花园的第一颗种子。<span>✿</span></div>}
             </article>
           </div>
-        </section>}
-
-        {tab === "计划" && <section className="page-section reveal">
-          <div className="section-head"><div><p className="eyebrow">SLOW & STEADY</p><h2>不费力的定投计划</h2></div><p>先活得安心，再慢慢变富。</p></div>
-          <section className="plan-grid">
-            <article className="panel safety"><span className="sticker">第一优先级</span><h2>把安全垫铺软</h2><div className="big-stat">{targetMonths}<small>个月</small></div><input aria-label="备用金目标月数" type="range" min="3" max="12" value={targetMonths} onChange={(e) => setTargetMonths(Number(e.target.value))} /><div className="range-label"><span>3个月</span><span>12个月</span></div><label>预计每月必要支出<div className="money-input small"><span>¥</span><input type="number" min="0" value={necessary || ""} onChange={(e) => setNecessary(Number(e.target.value))} /></div></label><p className="note">你的目标备用金：<strong>{money.format(emergencyTarget)}</strong></p></article>
-            <article className="panel allocation"><span className="sticker lavender">参考配方</span><h2>每 100 元怎么种</h2>{[["核心宽基",50,"#2c5cff"],["红利/价值",20,"#ff5d44"],["债券/货币",20,"#83b792"],["机会储备",10,"#f1c84b"]].map(([name, pct, color]) => <div className="allocation-row" key={String(name)}><i style={{ background: String(color) }} /><span>{name}</span><b>{pct}%</b></div>)}<p className="note">这里只定义组合功能。选具体基金前，再比较指数、费率和跟踪误差。</p></article>
-            <article className="panel rules"><span className="sticker pink">我的纪律卡</span><h2>四条简单规则</h2><ol><li><span>01</span>工资到账后执行，不靠月底意志力</li><li><span>02</span>结余≤0 或需要动用备用金时暂停</li><li><span>03</span>只按月复盘，不因几天涨跌改计划</li><li><span>04</span>不借款、不透支、不追热点定投</li></ol></article>
-          </section>
-        </section>}
-
-        <footer><span>钱途花园 · 数据仅保存在当前设备</span><span>慢慢来，比较快。</span></footer>
+        </div>
       </section>
+
+      <section className="statement wrap reveal"><p>先攒下让自己<span>不慌的钱，</span>再用不影响生活的钱<span>长期定投。</span>慢一点没关系，真正重要的是<span>一直在场。</span></p></section>
+
+      <section className="section" id="plan">
+        <div className="wrap">
+          <p className="eyebrow reveal">03 — SLOW & STEADY</p>
+          <h2 className="section-title reveal">一份适合实习期的，<br /><span className="mark violet-mark">不费力</span>定投计划。</h2>
+          <div className="plan-grid">
+            <article className="plan-card safety-card reveal"><span className="card-tag">Priority 01</span><h3>先把安全垫铺软</h3><div className="month-number">{targetMonths}<small>个月</small></div><input aria-label="备用金目标月数" type="range" min="3" max="12" value={targetMonths} onChange={(event) => setTargetMonths(Number(event.target.value))} /><div className="range-label"><span>3 个月</span><span>12 个月</span></div><label>预计每月必要支出<div className="inline-money"><span>¥</span><input type="number" min="0" value={necessary || ""} onChange={(event) => setNecessary(Number(event.target.value))} /></div></label><p>目标备用金 <strong>{money.format(emergencyTarget)}</strong></p></article>
+            <article className="plan-card allocation-card reveal"><span className="card-tag">Recipe</span><h3>每 100 元怎么种</h3>{[["核心宽基", 50, "coral"], ["红利 / 价值", 20, "violet"], ["债券 / 货币", 20, "mint"], ["机会储备", 10, "butter"]].map(([name, pct, tone]) => <div className="allocation-row" key={String(name)}><i className={String(tone)} /><span>{name}</span><b>{pct}%</b></div>)}<p>这是组合功能参考，不是具体基金推荐。选基金时再比较指数、费率和跟踪误差。</p></article>
+            <article className="plan-card rules-card reveal"><span className="card-tag">My rules</span><h3>四条纪律，比预测行情更有用。</h3><ol><li><span>01</span>工资到账后执行，不靠月底意志力</li><li><span>02</span>结余 ≤ 0 或需要动用备用金时暂停</li><li><span>03</span>只按月复盘，不因几天涨跌改计划</li><li><span>04</span>不借款、不透支、不追热点定投</li></ol></article>
+          </div>
+        </div>
+      </section>
+
+      <section className="closing wrap reveal"><p>YOUR MONEY, YOUR PACE</p><h2>今天也给未来的自己，<em>浇点水。</em></h2><p>先填账户余额，再记下今天的一笔。你的数据只保存在这台设备。</p><a className="button light" href="#top">回到顶部 ↑</a><span className="closing-glow" /></section>
     </main>
-  );
+    <footer><span>钱途花园 · 实习期个人版</span><span>慢慢来，比较快。</span></footer>
+  </>;
 }
