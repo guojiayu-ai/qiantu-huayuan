@@ -71,6 +71,7 @@ export default function Home() {
   const [plan, setPlan, planLoaded] = useLocalState<InvestPlan>("money-garden-plan-v1", initialPlan);
   const [otherInvestmentValue, setOtherInvestmentValue, otherValueLoaded] = useLocalState("money-ledger-invest-value-v2", 0);
   const [month, setMonth] = useState(currentMonth);
+  const [dashboardMonth, setDashboardMonth] = useState(currentMonth);
   const [tab, setTab] = useState<Tab>("支出");
   const [flowDate, setFlowDate] = useState(today);
   const [category, setCategory] = useState("餐饮");
@@ -117,10 +118,10 @@ export default function Home() {
   const activeFunds = funds.filter((item) => item.active);
   const monthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(month)), [flows, month]);
   const monthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(month)), [investments, month]);
-  const currentMonthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(currentMonth)), [flows]);
-  const currentMonthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(currentMonth)), [investments]);
-  const income = currentMonthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
-  const expense = currentMonthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
+  const dashboardMonthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(dashboardMonth)), [flows, dashboardMonth]);
+  const dashboardMonthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(dashboardMonth)), [investments, dashboardMonth]);
+  const income = dashboardMonthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
+  const expense = dashboardMonthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
   const asOfTodayFlows = useMemo(() => flows.filter((item) => item.date <= today), [flows]);
   const cumulativeNetFlow = asOfTodayFlows.reduce((sum, item) => sum + (item.type === "收入" ? Number(item.amount) : -Number(item.amount)), 0);
   const accountNetFlows = useMemo(() => {
@@ -133,7 +134,7 @@ export default function Home() {
     return totals;
   }, [asOfTodayFlows, normalizedAccounts]);
   const currentAccounts = useMemo(() => normalizedAccounts.map((account) => ({ ...account, currentBalance: Number(account.balance || 0) + (accountNetFlows.get(account.id!) || 0) })), [normalizedAccounts, accountNetFlows]);
-  const investmentCashflow = currentMonthInvestments.reduce((sum, item) => {
+  const investmentCashflow = dashboardMonthInvestments.reduce((sum, item) => {
     if (item.type === "卖出") return sum + item.amount - item.fee;
     if (item.type === "分红") return sum + item.amount;
     if (item.type === "买入") return sum - item.amount - item.fee;
@@ -364,7 +365,7 @@ export default function Home() {
   return <main className="app-shell">
     <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span><span className={`privacy-badge sync-${syncStatus}`} title={syncStatus === "browser-only" ? "线上地址的数据只保存在当前浏览器" : "本机地址使用这台电脑上的同一份数据"}>{syncLabel} · 北京时间 · 人民币</span></div><div className="nav-right"><button onClick={exportFullCsv}>导出完整 CSV</button></div></header>
     <div className="dashboard">
-      <aside className="side-summary"><p className="kicker">ASSET OVERVIEW</p><h1>资产<br />与收支</h1><article className="total-card"><span>当前总资产</span><strong>{currency.format(totalAssets)}</strong><small>银行卡 {currency.format(bankTotal)} · 基金 {currency.format(fundMarketValue)}<br />累计收支 {signedMoney(cumulativeNetFlow)} · 其他理财 {currency.format(otherInvestmentValue)}</small></article><div className="side-metrics"><div><span>本月收入</span><strong className="positive">{currency.format(income)}</strong></div><div><span>本月支出</span><strong className="negative">{currency.format(expense)}</strong></div><div><span>日常净结余</span><strong className={dailyNet >= 0 ? "positive" : "negative"}>{signedMoney(dailyNet)}</strong></div><div><span>投资现金流</span><strong className={investmentCashflow >= 0 ? "positive" : "negative"}>{signedMoney(investmentCashflow)}</strong></div></div><div className="cash-change"><span>综合现金变化</span><strong className={totalCashChange >= 0 ? "positive" : "negative"}>{signedMoney(totalCashChange)}</strong></div></aside>
+      <aside className="side-summary"><p className="kicker">ASSET OVERVIEW</p><h1>资产<br />与收支</h1><article className="total-card"><span>当前总资产</span><strong>{currency.format(totalAssets)}</strong><small>银行卡 {currency.format(bankTotal)} · 基金 {currency.format(fundMarketValue)}<br />累计收支 {signedMoney(cumulativeNetFlow)} · 其他理财 {currency.format(otherInvestmentValue)}</small></article><label className="dashboard-month"><span>看板月份</span><input type="month" value={dashboardMonth} onChange={(event) => { if (event.target.value) setDashboardMonth(event.target.value); }} /></label><div className="side-metrics"><div><span>当月收入</span><strong className="positive">{currency.format(income)}</strong></div><div><span>当月支出</span><strong className="negative">{currency.format(expense)}</strong></div><div><span>日常净结余</span><strong className={dailyNet >= 0 ? "positive" : "negative"}>{signedMoney(dailyNet)}</strong></div><div><span>投资现金流</span><strong className={investmentCashflow >= 0 ? "positive" : "negative"}>{signedMoney(investmentCashflow)}</strong></div></div><div className="cash-change"><span>综合现金变化</span><strong className={totalCashChange >= 0 ? "positive" : "negative"}>{signedMoney(totalCashChange)}</strong></div></aside>
       <section className="workspace"><nav className="tabs">{(["收入", "支出", "定投", "资产", "设置"] as const).map((item) => <button className={tab === item ? "active" : ""} onClick={() => changeTab(item)} key={item}>{item}</button>)}</nav>
         {tab === "定投" && <label className="history-month floating-history-month">查看月份<input type="month" value={month} onChange={(event) => { if (event.target.value) setMonth(event.target.value); }} required /></label>}
         {tab === "收入" && renderFlowPanel("收入")}{tab === "支出" && renderFlowPanel("支出")}

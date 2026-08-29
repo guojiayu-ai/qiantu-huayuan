@@ -62,8 +62,10 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /最近成交价/);
   assert.match(page, /asOfTodayInvestments/);
   assert.match(page, /asOfTodayFlows/);
-  assert.match(page, /currentMonthFlows/);
-  assert.match(page, /currentMonthInvestments/);
+  assert.match(page, /const \[dashboardMonth, setDashboardMonth\] = useState\(currentMonth\)/);
+  assert.match(page, /dashboardMonthFlows/);
+  assert.match(page, /dashboardMonthInvestments/);
+  assert.match(page, /看板月份/);
   assert.doesNotMatch(page, /const income = monthFlows/);
   assert.doesNotMatch(page, /const investmentCashflow = monthInvestments/);
   assert.match(page, /accountNetFlows/);
