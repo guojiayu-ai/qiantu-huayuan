@@ -53,10 +53,24 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /CURRENCY_CODE = "CNY"/);
   assert.match(page, /\+ 添加账户/);
   assert.match(page, /如：浦发银行/);
-  assert.match(page, /tone: item\.tone \|\| tones\[index % tones\.length\]/);
+  assert.match(
+    page,
+    /tone: item\.tone \|\| legacyTones\[item\.color \|\| ""\] \|\| tones\[index % tones\.length\]/,
+  );
   assert.match(page, /latestPricedTrade/);
   assert.match(page, /priceIsEstimated/);
   assert.match(page, /最近成交价/);
+  assert.match(page, /asOfTodayInvestments/);
+  assert.match(page, /不受收支月份影响/);
+  assert.match(page, /当前净值（元）/);
+  assert.match(page, /未来日期交易不会提前计入/);
+  assert.match(page, /className="history-month"/);
+  assert.doesNotMatch(page, /className="nav-right"><label>.*type="month"/);
+  assert.match(page, /定投标的（可添加多只）/);
+  assert.match(page, /基金 \/ ETF/);
+  assert.match(page, /交易手续费（元）/);
+  assert.match(page, /成交金额（不含手续费）/);
+  assert.match(page, /实际支出/);
   assert.doesNotMatch(page, /7956|8259|4827/);
   assert.equal(hostingConfig.d1, null);
   assert.equal(hostingConfig.r2, null);

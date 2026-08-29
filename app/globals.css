@@ -38,7 +38,7 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .cash-change strong { display:block; margin-top:4px; font-size:21px; font-variant-numeric:tabular-nums; }
 .positive { color:var(--green)!important; }
 .negative { color:var(--red)!important; }
-.workspace { display:flex; flex-direction:column; overflow:hidden; }
+.workspace { position:relative; display:flex; flex-direction:column; overflow:hidden; }
 .tabs { height:54px; display:flex; align-items:center; gap:5px; padding:0 16px; border-bottom:1px solid var(--line); flex:none; }
 .tabs button { height:36px; padding:0 20px; border:0; border-radius:999px; background:transparent; color:#3f3a36; font-size:15px; font-weight:850; letter-spacing:.01em; }
 .tabs button.active { background:var(--ink); color:#fff; }
@@ -97,6 +97,10 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .trade-form { margin-top:10px; }
 .trade-table { margin-top:8px; }
 .panel-actions { display:flex; align-items:center; gap:10px; }
+.history-month { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:10px; font-weight:750; white-space:nowrap; }
+.history-month input { width:126px; height:30px; padding:0 7px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:10px; }
+.floating-history-month { position:absolute; top:69px; right:16px; z-index:3; }
+.invest-panel>.panel-head>p { visibility:hidden; }
 .text-button { border:0; border-bottom:1px solid currentColor; background:transparent; padding:2px 0; color:#4f4944; font-size:11px; font-weight:800; }
 .batch-box { display:grid; grid-template-columns:1fr 210px; gap:9px; margin-top:8px; padding:9px; border:1px solid var(--line); border-radius:12px; background:#fff; }
 .batch-box textarea { min-height:64px; resize:vertical; border:1px solid var(--line); border-radius:8px; padding:8px; font:600 11px var(--font-geist-mono); }
@@ -122,6 +126,9 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .holding-grid article>div { display:flex; justify-content:space-between; gap:8px; }
 .holding-grid span, .holding-grid small { color:var(--muted); font-size:10px; font-weight:650; }
 .holding-grid article>strong { display:block; margin:8px 0 2px; font-size:18px; }
+.holding-price { display:grid; grid-template-columns:1fr 112px; align-items:center; gap:10px; margin-top:9px; }
+.holding-price input { width:100%; height:30px; padding:0 8px; border:1px solid var(--line); border-radius:8px; background:#fffdf8; text-align:right; font-weight:800; font-variant-numeric:tabular-nums; outline:0; }
+.holding-price input:focus { border-color:var(--violet); box-shadow:0 0 0 3px rgba(165,138,230,.14); }
 .market-value { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-top:9px; padding:12px 15px; border:1px dashed var(--line); border-radius:13px; }
 .asset-note { margin:-3px 0 9px; padding:8px 11px; border-radius:9px; background:#fff4cf; color:#5d4b13; font-size:11px; font-weight:700; }
 .market-value>span { font-weight:700; }
