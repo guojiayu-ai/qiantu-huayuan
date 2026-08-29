@@ -118,6 +118,11 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .account.blue { background:#e7f0fa; }
 .account>div:first-child { display:flex; justify-content:space-between; align-items:center; }
 .account>div:first-child span { font-size:11px; color:var(--muted); font-weight:650; }
+.account-current { display:flex; justify-content:space-between; align-items:baseline; margin-top:10px; padding-bottom:5px; border-bottom:1px solid var(--ink); }
+.account-current span, .account-base span { font-size:10px; color:var(--muted); font-weight:700; }
+.account-current strong { font-size:20px; font-variant-numeric:tabular-nums; }
+.account-base { display:flex; justify-content:flex-end; align-items:center; gap:7px; margin-top:5px; }
+.account-base input { width:82px; min-width:0; padding:0; border:0; border-bottom:1px dashed rgba(23,21,19,.3); background:transparent; text-align:right; outline:0; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; }
 .balance-input, .market-value>div { display:flex; align-items:center; margin-top:19px; border-bottom:1px solid var(--ink); }
 .balance-input span, .market-value>div span { font-size:16px; }
 .balance-input input, .market-value input { width:100%; min-width:0; border:0; background:transparent; text-align:right; outline:0; font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; }

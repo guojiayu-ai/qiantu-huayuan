@@ -61,9 +61,14 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /priceIsEstimated/);
   assert.match(page, /最近成交价/);
   assert.match(page, /asOfTodayInvestments/);
+  assert.match(page, /asOfTodayFlows/);
+  assert.match(page, /accountNetFlows/);
+  assert.match(page, /currentBalance: Number\(account\.balance \|\| 0\) \+ \(accountNetFlows\.get\(account\.id!\) \|\| 0\)/);
+  assert.match(page, /const totalAssets = bankTotal \+ fundMarketValue/);
+  assert.match(page, /各账户当前余额 \+ 基金当前市值/);
   assert.match(page, /不受收支月份影响/);
   assert.match(page, /当前净值（元）/);
-  assert.match(page, /未来日期交易不会提前计入/);
+  assert.match(page, /未来日期记录不会提前计入/);
   assert.match(page, /className="history-month"/);
   assert.doesNotMatch(page, /className="nav-right"><label>.*type="month"/);
   assert.match(page, /if \(next === "定投"\) setMonth\(currentMonth\)/);
