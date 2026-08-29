@@ -33,8 +33,6 @@ test("server-renders the RMB finance tracker", async () => {
   assert.match(html, /本地保存 · 北京时间 · 人民币/);
   assert.match(html, /日期（北京时间）/);
   assert.match(html, /金额（人民币元）/);
-  assert.match(html, /工商银行/);
-  assert.match(html, /7956/);
   assert.match(html, /导出完整 CSV/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
@@ -51,6 +49,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.doesNotMatch(page, /fetch\s*\(/);
   assert.match(page, /TIME_ZONE = "Asia\/Shanghai"/);
   assert.match(page, /CURRENCY_CODE = "CNY"/);
+  assert.match(page, /\+ 添加账户/);
+  assert.match(page, /如：浦发银行/);
+  assert.doesNotMatch(page, /7956|8259|4827/);
   assert.equal(hostingConfig.d1, null);
   assert.equal(hostingConfig.r2, null);
 });

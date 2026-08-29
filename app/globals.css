@@ -53,6 +53,7 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .sheet-form input, .sheet-form select, .compact-grid input, .compact-grid select, .plan-card textarea, .plan-card details input, .fund-form input, .fund-form select, .mini-form input, .mini-form select, .fund-list input { width:100%; min-width:0; height:33px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:0 8px; outline:0; }
 .sheet-form input:focus, .sheet-form select:focus, .compact-grid input:focus, .plan-card textarea:focus, .fund-form input:focus, .mini-form input:focus { border-color:var(--violet); box-shadow:0 0 0 3px rgba(165,138,230,.14); }
 .sheet-form button { height:33px; border-radius:8px; }
+.form-warning { align-self:flex-start; margin-top:7px; padding:0; border:0; border-bottom:1px solid currentColor; background:transparent; color:#7a5710; font-size:11px; font-weight:800; }
 .table-wrap { min-height:0; flex:1; margin-top:11px; overflow:auto; border:1px solid var(--line); border-radius:13px; background:#fff; }
 table { width:100%; border-collapse:collapse; min-width:700px; font-size:12px; font-weight:580; }
 thead { position:sticky; top:0; z-index:2; }
@@ -101,6 +102,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .batch-box button { height:34px; border:0; border-radius:8px; background:var(--ink); color:#fff; font-weight:800; }
 
 .asset-panel { padding:18px; }
+.asset-add-form { grid-template-columns:1.25fr .8fr 1fr auto; margin:-2px 0 9px; padding:9px; border:1px solid var(--line); border-radius:11px; background:rgba(255,255,255,.72); }
 .account-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:9px; max-height:154px; overflow:auto; flex:none; }
 .account { display:block; padding:15px; border-radius:15px; border:1px solid rgba(23,21,19,.15); }
 .account.coral { background:color-mix(in srgb,var(--coral) 20%,#fff); }
@@ -131,6 +133,8 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .settings-grid>section { overflow:visible; }
 .settings-grid .backup-card { grid-column:1/-1; }
 .mini-form { display:grid; grid-template-columns:1fr 1fr auto; gap:6px; }
+.account-settings-form { grid-template-columns:1fr 1fr; }
+.account-settings-form button { grid-column:1/-1; }
 .mini-form button { height:33px; border-radius:8px; }
 .chip-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
 .chip { min-height:31px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:#f4f0ea; color:#4f4944; font-size:11px; font-weight:750; }
