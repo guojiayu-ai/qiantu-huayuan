@@ -66,6 +66,7 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /dashboardMonthFlows/);
   assert.match(page, /dashboardMonthInvestments/);
   assert.match(page, /看板月份/);
+  assert.match(page, /资产分布/);
   assert.doesNotMatch(page, /const income = monthFlows/);
   assert.doesNotMatch(page, /const investmentCashflow = monthInvestments/);
   assert.match(page, /accountNetFlows/);
