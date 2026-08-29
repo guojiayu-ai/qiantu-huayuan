@@ -117,8 +117,10 @@ export default function Home() {
   const activeFunds = funds.filter((item) => item.active);
   const monthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(month)), [flows, month]);
   const monthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(month)), [investments, month]);
-  const income = monthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
-  const expense = monthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
+  const currentMonthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(currentMonth)), [flows]);
+  const currentMonthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(currentMonth)), [investments]);
+  const income = currentMonthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
+  const expense = currentMonthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
   const asOfTodayFlows = useMemo(() => flows.filter((item) => item.date <= today), [flows]);
   const cumulativeNetFlow = asOfTodayFlows.reduce((sum, item) => sum + (item.type === "收入" ? Number(item.amount) : -Number(item.amount)), 0);
   const accountNetFlows = useMemo(() => {
@@ -131,7 +133,7 @@ export default function Home() {
     return totals;
   }, [asOfTodayFlows, normalizedAccounts]);
   const currentAccounts = useMemo(() => normalizedAccounts.map((account) => ({ ...account, currentBalance: Number(account.balance || 0) + (accountNetFlows.get(account.id!) || 0) })), [normalizedAccounts, accountNetFlows]);
-  const investmentCashflow = monthInvestments.reduce((sum, item) => {
+  const investmentCashflow = currentMonthInvestments.reduce((sum, item) => {
     if (item.type === "卖出") return sum + item.amount - item.fee;
     if (item.type === "分红") return sum + item.amount;
     if (item.type === "买入") return sum - item.amount - item.fee;
