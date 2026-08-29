@@ -210,10 +210,7 @@ export default function Home() {
       setEditingFlowId(null); setFlowAmount(""); setFlowNote("");
       setEditingInvestmentId(null); setInvestAmount(""); setInvestUnits(""); setInvestPrice(""); setInvestFee(""); setInvestValuation(""); setInvestRule(""); setInvestNote("");
     }
-    if (next === "定投" && investments.length && !investments.some((item) => item.date.startsWith(month))) {
-      const latestInvestment = [...investments].sort((a, b) => b.date.localeCompare(a.date))[0];
-      setMonth(latestInvestment.date.slice(0, 7));
-    }
+    if (next === "定投") setMonth(currentMonth);
     setTab(next);
   }
 
