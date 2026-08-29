@@ -52,6 +52,7 @@ export default function Home() {
   const [product, setProduct] = useState("");
   const [investAmount, setInvestAmount] = useState("");
   const [investNote, setInvestNote] = useState("");
+  const [tab, setTab] = useState<"收支" | "投资" | "资产">("收支");
 
   const monthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(month)), [flows, month]);
   const monthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(month)), [investments, month]);
@@ -84,53 +85,24 @@ export default function Home() {
   }
 
   return <main className="app-shell">
-    <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span></div><button onClick={exportCsv}>导出 CSV</button></header>
+    <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span></div><div className="nav-right"><label>月份<input type="month" value={month} onChange={(event) => setMonth(event.target.value)} /></label><button onClick={exportCsv}>导出 CSV</button></div></header>
+    <div className="dashboard">
+      <aside className="side-summary">
+        <p className="kicker">ASSET OVERVIEW</p><h1>资产<br />与收支</h1>
+        <article className="total-card"><span>当前总资产</span><strong>{currency.format(totalAssets)}</strong><small>银行卡 {currency.format(bankTotal)}<br />理财市值 {currency.format(investmentValue)}</small></article>
+        <div className="side-metrics"><div><span>本月收入</span><strong className="positive">{currency.format(income)}</strong></div><div><span>本月支出</span><strong className="negative">{currency.format(expense)}</strong></div><div><span>日常净结余</span><strong className={dailyNet >= 0 ? "positive" : "negative"}>{signedMoney(dailyNet)}</strong></div><div><span>投资现金流</span><strong className={investmentCashflow >= 0 ? "positive" : "negative"}>{signedMoney(investmentCashflow)}</strong></div></div>
+        <div className="cash-change"><span>综合现金变化</span><strong className={totalCashChange >= 0 ? "positive" : "negative"}>{signedMoney(totalCashChange)}</strong></div>
+      </aside>
 
-    <section className="overview">
-      <div className="overview-head"><div><p>YOUR MONEY, YOUR PACE</p><h1>资产与收支</h1></div><label>查看月份<input type="month" value={month} onChange={(event) => setMonth(event.target.value)} /></label></div>
-      <div className="summary-grid">
-        <article className="summary primary"><span>当前总资产</span><strong>{currency.format(totalAssets)}</strong><small>银行卡 {currency.format(bankTotal)} + 理财市值 {currency.format(investmentValue)}</small></article>
-        <article className="summary"><span>本月收入</span><strong className="positive">{currency.format(income)}</strong></article>
-        <article className="summary"><span>本月支出</span><strong className="negative">{currency.format(expense)}</strong></article>
-        <article className="summary"><span>日常净结余</span><strong className={dailyNet >= 0 ? "positive" : "negative"}>{signedMoney(dailyNet)}</strong></article>
-        <article className="summary"><span>投资现金流</span><strong className={investmentCashflow >= 0 ? "positive" : "negative"}>{signedMoney(investmentCashflow)}</strong><small>卖出/分红 − 买入/费用</small></article>
-        <article className="summary"><span>综合现金变化</span><strong className={totalCashChange >= 0 ? "positive" : "negative"}>{signedMoney(totalCashChange)}</strong><small>日常净结余 + 投资现金流</small></article>
-      </div>
-    </section>
+      <section className="workspace">
+        <nav className="tabs">{(["收支", "投资", "资产"] as const).map((item) => <button className={tab === item ? "active" : ""} onClick={() => setTab(item)} key={item}>{item === "收支" ? "收支记录" : item === "投资" ? "投资记录" : "资产余额"}</button>)}</nav>
 
-    <section className="block">
-      <div className="block-title"><div><span>01</span><h2>账户余额</h2></div><p>直接填写当前余额</p></div>
-      <div className="account-grid">{accounts.map((item, index) => <label className={`account ${item.tone}`} key={item.tail}><div><strong>{item.name}</strong><span>尾号 {item.tail}</span></div><div className="balance-input"><span>¥</span><input aria-label={`${item.name}余额`} type="number" step="0.01" value={item.balance || ""} placeholder="0.00" onChange={(event) => setAccounts(accounts.map((account, i) => i === index ? { ...account, balance: Number(event.target.value) } : account))} /></div></label>)}</div>
-      <label className="market-value"><span>理财当前市值</span><div><span>¥</span><input type="number" step="0.01" value={investmentValue || ""} placeholder="0.00" onChange={(event) => setInvestmentValue(Number(event.target.value))} /></div></label>
-    </section>
+        {tab === "收支" && <div className="tab-panel"><div className="panel-head"><div><span>01</span><h2>记录日常收支</h2></div><p>分类可自定义</p></div><form className="sheet-form" onSubmit={addFlow}><label>日期<input type="date" value={flowDate} onChange={(event) => setFlowDate(event.target.value)} required /></label><label>类型<select value={flowType} onChange={(event) => setFlowType(event.target.value as FlowType)}><option>收入</option><option>支出</option></select></label><label>分类<input list="category-list" value={category} onChange={(event) => setCategory(event.target.value)} required /><datalist id="category-list">{categorySuggestions.map((item) => <option key={item} value={item} />)}</datalist></label><label>账户<select value={flowAccount} onChange={(event) => setFlowAccount(event.target.value)}>{accounts.map((item) => <option key={item.tail}>{item.name} · {item.tail}</option>)}</select></label><label>金额<input type="number" min="0.01" step="0.01" value={flowAmount} onChange={(event) => setFlowAmount(event.target.value)} placeholder="0.00" required /></label><label>备注<input value={flowNote} onChange={(event) => setFlowNote(event.target.value)} placeholder="可不填" /></label><button type="submit">添加</button></form><div className="table-wrap"><table><thead><tr><th>日期</th><th>类型</th><th>分类</th><th>账户</th><th>备注</th><th className="number">金额</th><th /></tr></thead><tbody>{monthFlows.length ? monthFlows.map((item) => <tr key={item.id}><td>{item.date}</td><td><span className={`type ${item.type}`}>{item.type}</span></td><td>{item.category}</td><td>{item.account}</td><td className="note-cell">{item.note || "—"}</td><td className={`number ${item.type === "收入" ? "positive" : "negative"}`}>{item.type === "收入" ? "+" : "−"}{currency.format(item.amount)}</td><td><button className="delete" onClick={() => setFlows(flows.filter((entry) => entry.id !== item.id))}>删除</button></td></tr>) : <tr><td className="no-data" colSpan={7}>本月暂无收支记录</td></tr>}</tbody><tfoot><tr><td colSpan={5}>本月合计</td><td className={`number ${dailyNet >= 0 ? "positive" : "negative"}`}>{signedMoney(dailyNet)}</td><td /></tr></tfoot></table></div></div>}
 
-    <section className="block">
-      <div className="block-title"><div><span>02</span><h2>记录日常收支</h2></div><p>分类可直接输入自定义内容</p></div>
-      <form className="sheet-form" onSubmit={addFlow}>
-        <label>日期<input type="date" value={flowDate} onChange={(event) => setFlowDate(event.target.value)} required /></label>
-        <label>类型<select value={flowType} onChange={(event) => setFlowType(event.target.value as FlowType)}><option>收入</option><option>支出</option></select></label>
-        <label>分类<input list="category-list" value={category} onChange={(event) => setCategory(event.target.value)} required /><datalist id="category-list">{categorySuggestions.map((item) => <option key={item} value={item} />)}</datalist></label>
-        <label>账户<select value={flowAccount} onChange={(event) => setFlowAccount(event.target.value)}>{accounts.map((item) => <option key={item.tail}>{item.name} · {item.tail}</option>)}</select></label>
-        <label>金额<input type="number" min="0.01" step="0.01" value={flowAmount} onChange={(event) => setFlowAmount(event.target.value)} placeholder="0.00" required /></label>
-        <label>备注<input value={flowNote} onChange={(event) => setFlowNote(event.target.value)} placeholder="可不填" /></label>
-        <button type="submit">添加</button>
-      </form>
-      <div className="table-wrap"><table><thead><tr><th>日期</th><th>类型</th><th>分类</th><th>账户</th><th>备注</th><th className="number">金额</th><th /></tr></thead><tbody>{monthFlows.length ? monthFlows.map((item) => <tr key={item.id}><td>{item.date}</td><td><span className={`type ${item.type}`}>{item.type}</span></td><td>{item.category}</td><td>{item.account}</td><td className="note-cell">{item.note || "—"}</td><td className={`number ${item.type === "收入" ? "positive" : "negative"}`}>{item.type === "收入" ? "+" : "−"}{currency.format(item.amount)}</td><td><button className="delete" onClick={() => setFlows(flows.filter((entry) => entry.id !== item.id))}>删除</button></td></tr>) : <tr><td className="no-data" colSpan={7}>本月暂无收支记录</td></tr>}</tbody><tfoot><tr><td colSpan={5}>本月合计</td><td className={`number ${dailyNet >= 0 ? "positive" : "negative"}`}>{signedMoney(dailyNet)}</td><td /></tr></tfoot></table></div>
-    </section>
+        {tab === "投资" && <div className="tab-panel"><div className="panel-head"><div><span>02</span><h2>记录投资</h2></div><p>卖出/分红为流入，买入/费用为流出</p></div><form className="sheet-form invest-form" onSubmit={addInvestment}><label>日期<input type="date" value={investDate} onChange={(event) => setInvestDate(event.target.value)} required /></label><label>操作<select value={investType} onChange={(event) => setInvestType(event.target.value as InvestType)}><option>买入</option><option>卖出</option><option>分红</option><option>费用</option></select></label><label className="wide">产品/基金<input value={product} onChange={(event) => setProduct(event.target.value)} placeholder="例如：沪深300指数基金" required /></label><label>金额<input type="number" min="0.01" step="0.01" value={investAmount} onChange={(event) => setInvestAmount(event.target.value)} placeholder="0.00" required /></label><label>备注<input value={investNote} onChange={(event) => setInvestNote(event.target.value)} placeholder="可不填" /></label><button type="submit">添加</button></form><div className="table-wrap"><table><thead><tr><th>日期</th><th>操作</th><th>产品/基金</th><th>备注</th><th className="number">金额</th><th /></tr></thead><tbody>{monthInvestments.length ? monthInvestments.map((item) => { const incoming = item.type === "卖出" || item.type === "分红"; return <tr key={item.id}><td>{item.date}</td><td><span className={`type invest-${item.type}`}>{item.type}</span></td><td>{item.product}</td><td className="note-cell">{item.note || "—"}</td><td className={`number ${incoming ? "positive" : "negative"}`}>{incoming ? "+" : "−"}{currency.format(item.amount)}</td><td><button className="delete" onClick={() => setInvestments(investments.filter((entry) => entry.id !== item.id))}>删除</button></td></tr>}) : <tr><td className="no-data" colSpan={6}>本月暂无投资记录</td></tr>}</tbody><tfoot><tr><td colSpan={4}>本月投资现金流</td><td className={`number ${investmentCashflow >= 0 ? "positive" : "negative"}`}>{signedMoney(investmentCashflow)}</td><td /></tr></tfoot></table></div></div>}
 
-    <section className="block">
-      <div className="block-title"><div><span>03</span><h2>记录投资</h2></div><p>买入和费用为现金流出，卖出和分红为现金流入</p></div>
-      <form className="sheet-form invest-form" onSubmit={addInvestment}>
-        <label>日期<input type="date" value={investDate} onChange={(event) => setInvestDate(event.target.value)} required /></label>
-        <label>操作<select value={investType} onChange={(event) => setInvestType(event.target.value as InvestType)}><option>买入</option><option>卖出</option><option>分红</option><option>费用</option></select></label>
-        <label className="wide">产品/基金<input value={product} onChange={(event) => setProduct(event.target.value)} placeholder="例如：沪深300指数基金" required /></label>
-        <label>金额<input type="number" min="0.01" step="0.01" value={investAmount} onChange={(event) => setInvestAmount(event.target.value)} placeholder="0.00" required /></label>
-        <label>备注<input value={investNote} onChange={(event) => setInvestNote(event.target.value)} placeholder="可不填" /></label>
-        <button type="submit">添加</button>
-      </form>
-      <div className="table-wrap"><table><thead><tr><th>日期</th><th>操作</th><th>产品/基金</th><th>备注</th><th className="number">金额</th><th /></tr></thead><tbody>{monthInvestments.length ? monthInvestments.map((item) => { const incoming = item.type === "卖出" || item.type === "分红"; return <tr key={item.id}><td>{item.date}</td><td><span className={`type invest-${item.type}`}>{item.type}</span></td><td>{item.product}</td><td className="note-cell">{item.note || "—"}</td><td className={`number ${incoming ? "positive" : "negative"}`}>{incoming ? "+" : "−"}{currency.format(item.amount)}</td><td><button className="delete" onClick={() => setInvestments(investments.filter((entry) => entry.id !== item.id))}>删除</button></td></tr>}) : <tr><td className="no-data" colSpan={6}>本月暂无投资记录</td></tr>}</tbody><tfoot><tr><td colSpan={4}>本月投资现金流</td><td className={`number ${investmentCashflow >= 0 ? "positive" : "negative"}`}>{signedMoney(investmentCashflow)}</td><td /></tr></tfoot></table></div>
-    </section>
-
-    <footer>数据仅保存在当前浏览器 · 金额统一按人民币计算</footer>
+        {tab === "资产" && <div className="tab-panel asset-panel"><div className="panel-head"><div><span>03</span><h2>当前资产余额</h2></div><p>填写当前数值即可</p></div><div className="account-grid">{accounts.map((item, index) => <label className={`account ${item.tone}`} key={item.tail}><div><strong>{item.name}</strong><span>尾号 {item.tail}</span></div><div className="balance-input"><span>¥</span><input aria-label={`${item.name}余额`} type="number" step="0.01" value={item.balance || ""} placeholder="0.00" onChange={(event) => setAccounts(accounts.map((account, i) => i === index ? { ...account, balance: Number(event.target.value) } : account))} /></div></label>)}</div><label className="market-value"><span>理财当前市值</span><div><span>¥</span><input type="number" step="0.01" value={investmentValue || ""} placeholder="0.00" onChange={(event) => setInvestmentValue(Number(event.target.value))} /></div></label><div className="asset-total"><span>当前总资产</span><strong>{currency.format(totalAssets)}</strong></div></div>}
+      </section>
+    </div>
   </main>;
 }
