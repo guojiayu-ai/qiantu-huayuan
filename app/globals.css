@@ -11,7 +11,7 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .simple-nav { height:64px; padding:0 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(23,21,19,.09); background:rgba(255,253,248,.58); backdrop-filter:blur(16px); }
 .simple-nav>div:first-child { display:flex; align-items:baseline; gap:10px; }
 .simple-nav strong { font-size:18px; }
-.simple-nav span { color:var(--muted); font-size:11px; }
+.simple-nav span { color:#5f5953; font-size:12px; font-weight:650; }
 .nav-right { display:flex; align-items:center; gap:10px; }
 .nav-right label { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:10px; }
 .nav-right input, .nav-right button { height:34px; border-radius:9px; }
@@ -29,43 +29,43 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .total-card small { line-height:1.65; }
 .side-metrics { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:9px; }
 .side-metrics>div { padding:11px; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.63); }
-.side-metrics span, .cash-change span { display:block; color:var(--muted); font-size:9px; }
-.side-metrics strong { display:block; margin-top:5px; font-size:13px; font-variant-numeric:tabular-nums; }
+.side-metrics span, .cash-change span { display:block; color:#57514b; font-size:10px; font-weight:750; }
+.side-metrics strong { display:block; margin-top:5px; font-size:15px; font-weight:850; font-variant-numeric:tabular-nums; }
 .cash-change { margin-top:auto; padding-top:13px; border-top:1px solid var(--line); }
 .cash-change strong { display:block; margin-top:4px; font-size:21px; font-variant-numeric:tabular-nums; }
 .positive { color:var(--green)!important; }
 .negative { color:var(--red)!important; }
 .workspace { display:flex; flex-direction:column; overflow:hidden; }
 .tabs { height:54px; display:flex; align-items:center; gap:5px; padding:0 16px; border-bottom:1px solid var(--line); flex:none; }
-.tabs button { height:33px; padding:0 19px; border:0; border-radius:999px; background:transparent; color:var(--muted); font-weight:650; }
+.tabs button { height:36px; padding:0 20px; border:0; border-radius:999px; background:transparent; color:#3f3a36; font-size:15px; font-weight:850; letter-spacing:.01em; }
 .tabs button.active { background:var(--ink); color:#fff; }
 .tab-panel { height:calc(100% - 54px); min-height:0; padding:16px; display:flex; flex-direction:column; }
 .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:11px; flex:none; }
 .panel-head>div { display:flex; align-items:center; gap:10px; }
 .panel-head>div>span { display:grid; place-items:center; width:27px; height:27px; border-radius:50%; background:var(--ink); color:#fff; font:700 9px var(--font-geist-mono); }
-.panel-head h2 { margin:0; font-size:22px; letter-spacing:-.04em; }
-.panel-head p { margin:0; color:var(--muted); font-size:10px; }
+.panel-head h2 { margin:0; font-size:24px; font-weight:850; letter-spacing:-.04em; }
+.panel-head p { margin:0; color:#625c56; font-size:11px; font-weight:650; }
 .sheet-form { display:grid; gap:7px; align-items:end; padding:10px; background:#f8f4ed; border:1px solid var(--line); border-radius:13px; flex:none; }
 .flow-form { grid-template-columns:130px 1fr 1.15fr 140px 1fr auto; }
 .trade-form { grid-template-columns:115px 78px 1.2fr 105px 95px 95px 85px 105px 120px 1fr auto; }
-.sheet-form label, .compact-grid label, .plan-card details label, .fund-list label { display:grid; gap:4px; color:var(--muted); font-size:9px; }
+.sheet-form label, .compact-grid label, .plan-card details label, .fund-list label { display:grid; gap:4px; color:#4f4944; font-size:11px; font-weight:750; }
 .sheet-form input, .sheet-form select, .compact-grid input, .compact-grid select, .plan-card textarea, .plan-card details input, .fund-form input, .fund-form select, .mini-form input, .mini-form select, .fund-list input { width:100%; min-width:0; height:33px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:0 8px; outline:0; }
 .sheet-form input:focus, .sheet-form select:focus, .compact-grid input:focus, .plan-card textarea:focus, .fund-form input:focus, .mini-form input:focus { border-color:var(--violet); box-shadow:0 0 0 3px rgba(165,138,230,.14); }
 .sheet-form button { height:33px; border-radius:8px; }
 .table-wrap { min-height:0; flex:1; margin-top:11px; overflow:auto; border:1px solid var(--line); border-radius:13px; background:#fff; }
-table { width:100%; border-collapse:collapse; min-width:700px; font-size:11px; }
+table { width:100%; border-collapse:collapse; min-width:700px; font-size:12px; font-weight:580; }
 thead { position:sticky; top:0; z-index:2; }
 tfoot { position:sticky; bottom:0; z-index:2; }
 th, td { height:42px; padding:0 12px; border-bottom:1px solid #ece7df; text-align:left; white-space:nowrap; }
-th { height:36px; background:#f7f3ed; color:var(--muted); font-size:9px; font-weight:600; }
+th { height:38px; background:#f7f3ed; color:#514b45; font-size:11px; font-weight:800; }
 tbody tr:hover { background:#fcfaf6; }
 td small { display:block; color:var(--muted); font-size:8px; margin-top:2px; }
 .number { text-align:right; font-variant-numeric:tabular-nums; font-weight:650; }
 .note-cell { max-width:230px; overflow:hidden; text-overflow:ellipsis; color:var(--muted); }
-.type { display:inline-flex; padding:3px 8px; border-radius:99px; background:#e9f5ef; color:var(--green); font-size:9px; font-weight:700; }
+.type { display:inline-flex; padding:4px 9px; border-radius:99px; background:#e9f5ef; color:var(--green); font-size:11px; font-weight:850; }
 .type.支出, .type.invest-买入, .type.invest-费用 { background:#fff0ed; color:var(--red); }
 .type.invest-卖出, .type.invest-分红 { background:#e9f5ef; color:var(--green); }
-.delete { border:0; background:transparent; color:#999; font-size:9px; }
+.delete { border:0; background:transparent; color:#6f6963; font-size:11px; font-weight:750; }
 .delete:hover { color:var(--red); }
 .no-data { text-align:center; color:#a29b92; height:130px; }
 tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
@@ -123,7 +123,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .mini-form { display:grid; grid-template-columns:1fr 1fr auto; gap:6px; }
 .mini-form button { height:33px; border-radius:8px; }
 .chip-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
-.chip { min-height:28px; padding:5px 9px; border:1px solid var(--line); border-radius:999px; background:#f4f0ea; color:var(--muted); font-size:9px; }
+.chip { min-height:31px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:#f4f0ea; color:#4f4944; font-size:11px; font-weight:750; }
 .active-chip { border-color:var(--ink); background:var(--ink); color:#fff; }
 .income-chip { border-color:#a8d8c6; background:#e9f5ef; color:var(--green); }
 .expense-chip { border-color:#f2c1b9; background:#fff0ed; color:var(--red); }
