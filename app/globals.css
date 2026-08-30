@@ -80,7 +80,7 @@ button:disabled { cursor:not-allowed; opacity:.42; }
 .sheet-form { display:grid; gap:7px; align-items:end; padding:10px; background:#f8f4ed; border:1px solid var(--line); border-radius:13px; flex:none; }
 .flow-form { grid-template-columns:130px 1fr 1.15fr 140px 1fr auto; }
 .trade-form { grid-template-columns:repeat(6,minmax(0,1fr)); }
-.sheet-form label, .compact-grid label, .plan-card details label, .fund-list label { display:grid; gap:4px; color:#4f4944; font-size:11px; font-weight:750; }
+.sheet-form label, .compact-grid label, .plan-card details label, .fund-form label, .fund-list label { display:grid; gap:4px; color:#4f4944; font-size:11px; font-weight:750; }
 .sheet-form input, .sheet-form select, .compact-grid input, .compact-grid select, .plan-card textarea, .plan-card details input, .fund-form input, .fund-form select, .mini-form input, .mini-form select, .fund-list input { width:100%; min-width:0; height:33px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:0 8px; outline:0; }
 .sheet-form input:focus, .sheet-form select:focus, .compact-grid input:focus, .plan-card textarea:focus, .fund-form input:focus, .mini-form input:focus { border-color:var(--violet); box-shadow:0 0 0 3px rgba(165,138,230,.14); }
 .sheet-form button { height:33px; border-radius:8px; }
@@ -106,16 +106,24 @@ td small { display:block; color:var(--muted); font-size:10px; margin-top:2px; }
 tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 
 .invest-panel { overflow:hidden; }
-.invest-layout { height:238px; display:grid; grid-template-columns:1fr 1.1fr; gap:10px; flex:none; }
-.plan-card, .fund-card, .settings-grid>section { min-width:0; overflow:auto; padding:13px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.62); }
+.invest-layout { height:250px; display:grid; grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr); gap:12px; flex:none; }
+.plan-card, .fund-card, .settings-grid>section { min-width:0; padding:13px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.62); }
+.plan-card, .fund-card { overflow:hidden; }
 .plan-card h3, .fund-card h3, .settings-grid h3 { margin:0 0 9px; font-size:14px; }
+.card-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px; }
+.card-title h3 { margin:0; }
+.card-title span { padding:4px 7px; border-radius:999px; background:#eef6f2; color:var(--green); font-size:9px; font-weight:800; white-space:nowrap; }
 .compact-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-.plan-card details { margin-top:8px; padding-top:7px; border-top:1px dashed var(--line); }
-.plan-card summary { color:var(--muted); font-size:11px; font-weight:700; cursor:pointer; }
+.plan-card details { margin-top:8px; padding:7px 9px; border:1px solid #e7e0d7; border-radius:9px; background:#fbf8f3; }
+.plan-card summary { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#4f4944; font-size:11px; font-weight:800; cursor:pointer; }
+.plan-card summary small { color:var(--muted); font-size:9px; font-weight:700; }
 .plan-card details label { margin-top:6px; }
 .plan-card textarea { height:47px; resize:vertical; padding:6px 8px; }
-.fund-form { display:grid; grid-template-columns:1.15fr .65fr .9fr 1fr .75fr .7fr auto; gap:5px; }
-.fund-form button { height:33px; border-radius:8px; font-size:10px; }
+.fund-form { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); align-items:end; gap:6px; }
+.fund-form label:nth-child(1), .fund-form label:nth-child(2), .fund-form label:nth-child(3), .fund-form label:nth-child(4) { grid-column:span 3; }
+.fund-form label:nth-child(5), .fund-form label:nth-child(6), .fund-form button { grid-column:span 4; }
+.fund-form input, .fund-form select { font-size:10px; }
+.fund-form button { height:33px; border-radius:8px; font-size:10px; white-space:nowrap; }
 .fund-list { display:grid; gap:5px; margin-top:8px; }
 .fund-list article { display:grid; grid-template-columns:1fr 100px auto; align-items:end; gap:8px; padding:7px 9px; border:1px solid var(--line); border-radius:10px; background:#fff; }
 .fund-list article>div span { display:block; color:var(--muted); font-size:10px; margin-top:2px; }
@@ -213,6 +221,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
   .flow-form, .trade-form { grid-template-columns:repeat(3,1fr); }
   .invest-layout { height:auto; grid-template-columns:1fr; }
   .invest-panel { overflow:auto; }
+  .plan-card, .fund-card { overflow:visible; }
   .fund-form { grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:600px) {

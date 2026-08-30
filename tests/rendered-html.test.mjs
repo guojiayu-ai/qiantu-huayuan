@@ -83,7 +83,10 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.doesNotMatch(page, /className="nav-right"><label>.*type="month"/);
   assert.match(page, /if \(next === "定投"\) setMonth\(currentMonth\)/);
   assert.doesNotMatch(page, /latestInvestment\.date\.slice/);
-  assert.match(page, /定投标的（可添加多只）/);
+  assert.match(page, /定投标的/);
+  assert.match(page, /支持添加多只/);
+  assert.match(page, /组合定位/);
+  assert.match(page, /估值方法/);
   assert.match(page, /基金 \/ ETF/);
   assert.match(page, /交易手续费（元）/);
   assert.match(page, /成交金额（不含手续费）/);
