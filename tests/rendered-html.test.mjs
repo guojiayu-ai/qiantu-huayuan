@@ -124,6 +124,15 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /基金 \/ ETF/);
   assert.match(page, /交易手续费（元）/);
   assert.match(page, /成交金额（不含手续费）/);
+  assert.match(page, /成交时指数估值/);
+  assert.match(page, /估值数据来源/);
+  assert.match(page, /估值计算口径/);
+  assert.match(page, /偏离计划原因/);
+  assert.match(page, /份额 \/ 成交价/);
+  assert.match(page, /备注 \/ 偏离/);
+  assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
+  assert.match(page, /item\.deviationReason/);
+  assert.match(page, /估值数据来源: i\.valuationSource/);
   assert.match(page, /实际支出/);
   assert.doesNotMatch(page, /7956|8259|4827/);
   assert.equal(hostingConfig.d1, null);
