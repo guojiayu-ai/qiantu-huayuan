@@ -1,100 +1,120 @@
-# vinext-starter
+<div align="center">
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+# 钱途花园
 
-## Prerequisites
+**把每天的一笔收支，慢慢种成看得见的资产。**
 
-- Node.js `>=22.13.0`
+一款本机优先的个人财务工具：在同一张账本里记录收入、支出、账户余额和指数基金定投，自动算清“这个月花了多少”和“截至今天一共有多少钱”。
 
-## Quick Start
+[在线体验](https://qiantu-huayuan.jguo2780.chatgpt.site/) · [本机运行](#本机运行) · [数据口径](#数据是怎么算的) · [隐私与迁移](#隐私与迁移)
+
+</div>
+
+> 截图使用虚构演示数据。在线版的数据只保存在访问者自己的浏览器中，不会展示仓库作者的私人账本。
+
+![钱途花园收支与资产看板](./docs/images/dashboard-expense.jpg)
+
+## 它适合谁
+
+钱途花园面向想长期记账、但不想维护复杂 Excel 的个人用户。它没有社交、广告和理财推销，重点只有三件事：快速记一笔、把账户余额算对、把定投计划真正执行下去。
+
+- 收入和支出分开记录，分类、账户均可自定义。
+- 只填写一次账户初始余额，后续收支和投资交易会自动更新对应账户。
+- 月度看板独立选择月份；总资产始终按“截至今天”计算，不被月份筛选误伤。
+- 一套页面同时管理定投规则、多个基金 / ETF、基金代码、当前净值和交易历史。
+- 全量 CSV 用于查阅分析，JSON 用于完整备份与恢复。
+- 北京时间、人民币口径，桌面端横向一屏即可完成日常操作。
+
+## 页面预览
+
+### 定投不是一行备注，而是一套可以执行的计划
+
+定投页把长期目标、应急金、月度预算、标的估值方法和每次成交放在一起。支持添加多只基金 / ETF，并保留代码、份额、成交价、手续费、触发规则与备注。
+
+![定投计划与执行记录](./docs/images/investment-plan.jpg)
+
+### 总资产看“今天”，月度收支看“当月”
+
+资产页展示各账户的当前余额、基金持有份额与当前市值。更新基金当前净值只会改变当前估值，不会篡改历史成交记录。
+
+![截至今天的资产](./docs/images/current-assets.jpg)
+
+## 数据是怎么算的
+
+| 指标 | 计算口径 |
+| --- | --- |
+| 账户当前余额 | 初始余额 + 截至今天流入该账户的收入 − 支出 ± 投资交易影响 |
+| 基金当前市值 | 截至今天持有份额 × 当前净值 |
+| 人民币总资产 | 所有账户当前余额 + 基金当前市值 + 其他理财当前市值 |
+| 当月日常净结余 | 所选月份收入 − 所选月份支出 |
+| 当月净现金变化 | 日常净结余 + 所选月份投资现金流 |
+
+未来日期的记录不会提前计入当前资产。买入、卖出、分红和费用会根据交易类型分别影响账户余额、基金份额与投资现金流，避免把基金买入重复算成“资产消失”。
+
+## 一次完整的使用流程
+
+```mermaid
+flowchart LR
+  A[设置账户与初始余额] --> B[记录收入 / 支出]
+  A --> C[配置定投计划与标的]
+  C --> D[记录买入 / 卖出 / 分红 / 费用]
+  B --> E[账户余额自动联动]
+  D --> E
+  D --> F[份额与基金市值自动更新]
+  E --> G[截至今天总资产]
+  F --> G
+  B --> H[所选月份现金流]
+  D --> H
+  G --> I[CSV 查阅 / JSON 备份]
+  H --> I
+```
+
+## 本机运行
+
+需要 Node.js `>=22.13.0`。
 
 ```bash
+git clone https://github.com/guojiayu-ai/qiantu-huayuan.git
+cd qiantu-huayuan
 npm install
+npm run dev:shared
+```
+
+打开 [http://localhost:3000](http://localhost:3000)。`dev:shared` 会同时启动网页和本机数据服务，Chrome、Safari 等浏览器只要访问同一台电脑上的这个地址，就会读取同一份本机账本。
+
+仅做界面开发时也可以运行：
+
+```bash
 npm run dev
+```
+
+## 隐私与迁移
+
+- 在线版：数据保存在当前浏览器的本地存储中；换浏览器不会自动出现原数据。
+- 本机共享版：数据写入项目下的 `.local-data/`，该目录已被 Git 忽略，不会随代码上传 GitHub。
+- 完整 CSV：包含账户、分类、全部收支、定投计划、标的和交易，适合长期查阅与二次分析。
+- JSON 备份 / 恢复：保留应用完整结构，适合换电脑或浏览器时无损迁移。
+- 项目不要求注册账户，也不会主动上传银行卡余额或交易记录。
+
+仍建议定期下载 JSON 备份，并把备份文件放在你自己可信的加密磁盘或私人云盘中。
+
+## 开发与验证
+
+```bash
+npm test
+npm run lint
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+主要技术栈：React、TypeScript、Vinext / Vite，以及一个只在本机运行的轻量数据服务。
 
-## Included Shape
+## 项目原则
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+1. **账要算对。** 页面展示必须能追溯到唯一事实来源，避免余额与流水重复计算。
+2. **现在与历史分开。** 总资产回答“今天有多少”，月份筛选回答“那个月发生了什么”。
+3. **默认保护隐私。** 个人财务数据留在本机，公开仓库只保存程序代码和虚构演示截图。
+4. **能长期带走。** 不把数据锁进网站，随时可以导出、备份和恢复。
 
-## Workspace Auth Headers
+---
 
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+如果这个项目对你有帮助，欢迎点一个 Star。更重要的是：从今天的一笔开始，把自己的钱看清楚。
