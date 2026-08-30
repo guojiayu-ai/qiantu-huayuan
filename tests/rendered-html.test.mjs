@@ -99,8 +99,15 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(settingsPage, /我的计划/);
   assert.match(settingsPage, /定投标的/);
   assert.match(settingsPage, /当前净值（元）/);
+  assert.doesNotMatch(settingsPage, /买入、暂停、退出与复盘规则/);
+  assert.match(page, /function deleteFund/);
+  assert.match(settingsPage, /className="delete-button"/);
+  assert.doesNotMatch(settingsPage, /fund\.active \? "停用" : "启用"/);
   assert.doesNotMatch(settingsPage, /<h2>设置<\/h2>/);
   assert.match(settingsPage, /categories\.filter\(\(item\) => item\.type === newCategoryType\)/);
+  assert.match(settingsPage, /className="category-switch"/);
+  assert.match(settingsPage, /\(\["收入", "支出"\] as FlowType\[\]\)/);
+  assert.match(settingsPage, /className="mini-form category-form"/);
   assert.match(settingsPage, /className="category-delete"/);
   assert.match(page, /function deleteCategory/);
   assert.match(page, /基金 \/ ETF/);
