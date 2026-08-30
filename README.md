@@ -6,7 +6,7 @@
 
 一款本机优先的个人财务工具：在同一张账本里记录收入、支出、账户余额和指数基金定投，自动算清“这个月花了多少”和“截至今天一共有多少钱”。
 
-[在线体验](https://qiantu-huayuan.jguo2780.chatgpt.site/) · [本机运行](#本机运行) · [数据口径](#数据是怎么算的) · [隐私与迁移](#隐私与迁移)
+[在线体验](https://qiantu-huayuan.jguo2780.chatgpt.site/) · [产品需求文档（PRD）](https://ucnvqs2nk9a7.feishu.cn/docx/MB6pdmYMAomqfgxKIzycMcGCnee) · [本机运行](#本机运行) · [数据口径](#数据是怎么算的) · [隐私与迁移](#隐私与迁移)
 
 </div>
 
@@ -38,6 +38,10 @@
 资产页展示各账户的当前余额、基金持有份额与当前市值。更新基金当前净值只会改变当前估值，不会篡改历史成交记录。
 
 ![截至今天的资产](./docs/images/current-assets.jpg)
+
+## 产品文档
+
+想了解这个项目为什么这样设计、各页面如何衔接，以及每个数字应当怎样计算，可以阅读飞书文档：[《钱途花园｜长期使用产品需求文档 v1.1》](https://ucnvqs2nk9a7.feishu.cn/docx/MB6pdmYMAomqfgxKIzycMcGCnee)。文档包含产品目标、信息架构、页面职责、核心流程、数据口径、异常处理和长期迭代原则。
 
 ## 数据是怎么算的
 
