@@ -118,16 +118,19 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .fund-form input, .fund-form select { font-size:10px; }
 .fund-form button { height:33px; border-radius:8px; font-size:10px; white-space:nowrap; }
 .fund-list { display:grid; gap:6px; margin-top:7px; }
-.fund-list article { display:grid; grid-template-columns:minmax(0,1fr) 116px auto; align-items:center; gap:10px; min-height:50px; padding:6px 10px; border:1px solid var(--line); border-radius:11px; background:#fff; }
+.fund-list article { display:grid; grid-template-columns:minmax(0,1fr) 116px 48px; align-items:end; gap:10px; min-height:50px; padding:6px 10px; border:1px solid var(--line); border-radius:11px; background:#fff; }
 .fund-summary { align-self:center; min-width:0; }
 .fund-summary strong, .fund-summary span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .fund-summary strong { display:block; font-size:12px; }
 .fund-list article>div span { display:block; color:var(--muted); font-size:9px; margin-top:3px; }
 .fund-list label { align-self:end; }
+.fund-list input[type="number"] { appearance:textfield; -moz-appearance:textfield; }
+.fund-list input[type="number"]::-webkit-inner-spin-button,
+.fund-list input[type="number"]::-webkit-outer-spin-button { margin:0; appearance:none; -webkit-appearance:none; }
 .soft-button { border:1px solid var(--line)!important; background:#fff!important; color:var(--ink)!important; }
 .delete-button { border:1px solid #efb5ac!important; background:#fff!important; color:var(--red)!important; font-weight:800; }
 .delete-button:hover { background:var(--red)!important; color:#fff!important; }
-.fund-list button { height:29px; padding:0 9px; border-radius:7px; font-size:9px; }
+.fund-list button { width:48px; height:33px; padding:0; border-radius:7px; font-size:9px; }
 .muted-row { opacity:.5; filter:grayscale(.6); }
 .empty-card { padding:18px; border:1px dashed var(--line); border-radius:10px; text-align:center; color:var(--muted); font-size:11px; font-weight:650; }
 .trade-form { margin-top:0; }
@@ -192,13 +195,13 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .settings-panel .compact-grid input, .settings-panel .compact-grid select, .settings-panel .fund-form input, .settings-panel .fund-form select, .settings-panel .mini-form input { font-size:12px; font-weight:650; }
 .account-card>h3 { height:29px; display:flex; align-items:center; margin-bottom:9px !important; line-height:29px; }
 .mini-form { display:grid; grid-template-columns:1fr 1fr auto; gap:6px; }
-.account-settings-form { grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,.9fr) auto; }
+.account-settings-form { grid-template-columns:minmax(92px,1.25fr) minmax(58px,.62fr) minmax(72px,.82fr) 62px; }
 .account-settings-form button { grid-column:auto; padding-inline:16px; }
 .mini-form button { height:33px; border-radius:8px; }
 .chip-list { display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
 .chip { min-height:31px; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:#f4f0ea; color:#4f4944; font-size:11px; font-weight:750; }
-.account-card .chip-list { gap:4px; }
-.account-card .chip { min-height:27px; padding:4px 6px; font-size:11px; font-weight:800; }
+.account-card .chip-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; }
+.account-card .chip { width:100%; min-height:27px; padding:4px 6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; font-weight:800; }
 .active-chip { border-color:var(--ink); background:var(--ink); color:#fff; }
 .income-chip { border-color:#a8d8c6; background:#e9f5ef; color:var(--green); }
 .expense-chip { border-color:#f2c1b9; background:#fff0ed; color:var(--red); }
