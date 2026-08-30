@@ -134,7 +134,8 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /估值数据来源/);
   assert.match(page, /估值计算口径/);
   assert.match(page, /偏离计划原因/);
-  assert.match(page, /份额 \/ 成交价/);
+  assert.match(page, /className="trade-units">份额/);
+  assert.match(page, /className="trade-price">成交价/);
   assert.match(page, /备注 \/ 偏离/);
   assert.match(page, /className="trade-amount">成交金额/);
   assert.match(page, /className="detail-button"/);
@@ -143,10 +144,13 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /aria-label="关闭估值详情"/);
   assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
   assert.match(page, /item\.deviationReason/);
-  assert.match(styles, /\.trade-table th:nth-child\(4\) \{ width:10%; \}/);
-  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:17%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(4\) \{ width:11%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(7\) \{ width:8%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:16%; \}/);
   assert.match(styles, /\.trade-table th\.trade-account, \.trade-table td\.trade-account \{ padding-left:0; padding-right:2px; text-align:left; white-space:nowrap; \}/);
   assert.match(styles, /\.trade-table td\.trade-account \{ font-size:12px; font-weight:750; \}/);
+  assert.match(styles, /\.trade-table th\.trade-units, \.trade-table td\.trade-units,/);
+  assert.match(styles, /\.trade-table th\.trade-price, \.trade-table td\.trade-price/);
   assert.match(styles, /\.trade-table th\.trade-operation \{ padding-left:7px; padding-right:2px; text-align:left; \}/);
   assert.match(styles, /\.trade-table td\.trade-operation \{ padding-left:0; padding-right:2px; overflow:visible; white-space:nowrap; text-align:left; \}/);
   assert.match(styles, /\.trade-table th\.trade-valuation, \.trade-table td\.trade-valuation \{ padding-left:0; padding-right:2px; text-align:left; \}/);
