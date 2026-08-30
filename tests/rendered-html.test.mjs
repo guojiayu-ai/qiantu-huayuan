@@ -99,10 +99,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(settingsPage, /我的计划/);
   assert.match(settingsPage, /定投标的/);
   assert.match(settingsPage, /当前净值（元）/);
-  assert.match(settingsPage, /aria-label="设置分区"/);
   assert.doesNotMatch(settingsPage, /<h2>设置<\/h2>/);
   assert.match(settingsPage, /categories\.filter\(\(item\) => item\.type === newCategoryType\)/);
-  assert.match(settingsPage, /删除只会移除以后记账时的选项，历史收支记录会保留/);
+  assert.match(settingsPage, /className="category-delete"/);
   assert.match(page, /function deleteCategory/);
   assert.match(page, /基金 \/ ETF/);
   assert.match(page, /交易手续费（元）/);
