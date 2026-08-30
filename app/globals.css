@@ -7,7 +7,7 @@ body { margin:0; color:var(--ink); font-family:var(--font-geist-sans),"PingFang 
 button, input, select, textarea { font:inherit; color:inherit; }
 button { cursor:pointer; }
 button:disabled { cursor:not-allowed; opacity:.42; }
-.app-shell { height:calc(100svh - 20px); width:calc(100% - 20px); margin:10px; background:radial-gradient(circle at 37% 8%,rgba(165,138,230,.18),transparent 24%),radial-gradient(circle at 60% 22%,rgba(255,118,93,.15),transparent 22%),var(--paper); border-radius:34px; overflow:hidden; }
+.app-shell { height:100svh; width:100%; margin:0; background:radial-gradient(circle at 37% 8%,rgba(165,138,230,.18),transparent 24%),radial-gradient(circle at 60% 22%,rgba(255,118,93,.15),transparent 22%),var(--paper); border-radius:0; overflow:hidden; }
 .simple-nav { height:64px; padding:0 28px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(23,21,19,.09); background:rgba(255,253,248,.58); backdrop-filter:blur(16px); }
 .simple-nav>div:first-child { display:flex; align-items:baseline; gap:10px; }
 .simple-nav strong { font-size:18px; }
