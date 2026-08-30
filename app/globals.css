@@ -106,9 +106,8 @@ td small { display:block; color:var(--muted); font-size:10px; margin-top:2px; }
 tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 
 .invest-panel { overflow:hidden; }
-.invest-layout { height:250px; display:grid; grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr); gap:12px; flex:none; }
 .plan-card, .fund-card, .settings-grid>section { min-width:0; padding:13px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.62); }
-.plan-card, .fund-card { overflow:hidden; }
+.plan-card, .fund-card { overflow:visible; }
 .plan-card h3, .fund-card h3, .settings-grid h3 { margin:0 0 9px; font-size:14px; }
 .card-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px; }
 .card-title h3 { margin:0; }
@@ -131,7 +130,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .fund-list button { height:29px; padding:0 9px; border-radius:7px; font-size:9px; }
 .muted-row { opacity:.5; filter:grayscale(.6); }
 .empty-card { padding:18px; border:1px dashed var(--line); border-radius:10px; text-align:center; color:var(--muted); font-size:11px; font-weight:650; }
-.trade-form { margin-top:10px; }
+.trade-form { margin-top:0; }
 .trade-table { margin-top:8px; }
 .panel-actions { display:flex; align-items:center; gap:10px; }
 .history-month { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:10px; font-weight:750; white-space:nowrap; }
@@ -180,7 +179,9 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .asset-total strong { font-size:30px; color:var(--yellow); letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
 
 .settings-panel { overflow:hidden; }
-.settings-grid { min-height:0; display:grid; grid-template-columns:1fr 1.2fr; gap:10px; overflow:auto; }
+.settings-content { min-height:0; display:grid; gap:10px; overflow:auto; padding-right:2px; }
+.investment-settings { display:grid; grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr); align-items:start; gap:10px; }
+.settings-grid { display:grid; grid-template-columns:1fr 1.2fr; gap:10px; }
 .settings-grid>section { overflow:visible; }
 .settings-grid .backup-card { grid-column:1/-1; }
 .mini-form { display:grid; grid-template-columns:1fr 1fr auto; gap:6px; }
@@ -211,6 +212,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
   .trade-form { grid-template-columns:repeat(5,1fr); }
   .trade-form button { grid-column:auto; }
   .compact-grid { grid-template-columns:repeat(2,1fr); }
+  .investment-settings { grid-template-columns:1fr; }
 }
 @media (max-width:900px) {
   html, body { overflow:auto; }
@@ -219,9 +221,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
   .side-summary { min-height:500px; }
   .workspace { min-height:720px; }
   .flow-form, .trade-form { grid-template-columns:repeat(3,1fr); }
-  .invest-layout { height:auto; grid-template-columns:1fr; }
   .invest-panel { overflow:auto; }
-  .plan-card, .fund-card { overflow:visible; }
   .fund-form { grid-template-columns:repeat(3,1fr); }
 }
 @media (max-width:600px) {

@@ -87,6 +87,18 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /支持添加多只/);
   assert.match(page, /组合定位/);
   assert.match(page, /估值方法/);
+  const investmentPage = page.slice(
+    page.indexOf('{tab === "定投" && <div className="tab-panel invest-panel">'),
+    page.indexOf('{tab === "资产" && <div className="tab-panel asset-panel">'),
+  );
+  const settingsPage = page.slice(
+    page.indexOf('{tab === "设置" && <div className="tab-panel settings-panel">'),
+  );
+  assert.match(investmentPage, /<h2>记录投资<\/h2>/);
+  assert.doesNotMatch(investmentPage, /我的计划|定投标的|当前净值（元）/);
+  assert.match(settingsPage, /我的计划/);
+  assert.match(settingsPage, /定投标的/);
+  assert.match(settingsPage, /当前净值（元）/);
   assert.match(page, /基金 \/ ETF/);
   assert.match(page, /交易手续费（元）/);
   assert.match(page, /成交金额（不含手续费）/);
