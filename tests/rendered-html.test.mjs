@@ -98,6 +98,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.doesNotMatch(investmentPage, /我的计划|定投标的|当前净值（元）/);
   assert.match(settingsPage, /我的计划/);
   assert.match(settingsPage, /定投标的/);
+  assert.match(settingsPage, /className="settings-row strategy-row"/);
+  assert.match(settingsPage, /className="settings-row management-row"/);
+  assert.doesNotMatch(settingsPage, /className="settings-stack"/);
   assert.match(settingsPage, /当前净值（元）/);
   assert.doesNotMatch(settingsPage, /买入、暂停、退出与复盘规则/);
   assert.match(page, /function deleteFund/);

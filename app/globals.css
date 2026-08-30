@@ -182,8 +182,8 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 
 .settings-panel { overflow:hidden; }
 .settings-content { min-height:0; display:flex; flex-direction:column; gap:10px; overflow:auto; padding-right:2px; }
-.settings-columns { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); align-items:start; gap:10px; }
-.settings-stack { display:flex; min-width:0; flex-direction:column; gap:10px; }
+.settings-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); align-items:start; gap:10px; }
+.settings-row>section { min-width:0; }
 .settings-card { overflow:visible; }
 .mini-form { display:grid; grid-template-columns:1fr 1fr auto; gap:6px; }
 .account-settings-form { grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,.9fr) auto; }
@@ -224,7 +224,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
   .trade-form { grid-template-columns:repeat(5,1fr); }
   .trade-form button { grid-column:auto; }
   .compact-grid { grid-template-columns:repeat(2,1fr); }
-  .settings-columns { grid-template-columns:1fr; }
+  .settings-row { grid-template-columns:1fr; }
 }
 @media (max-width:900px) {
   html, body { overflow:auto; }
