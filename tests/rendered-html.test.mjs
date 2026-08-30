@@ -100,6 +100,11 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   );
   assert.match(investmentPage, /<h2>记录投资<\/h2>/);
   assert.doesNotMatch(investmentPage, /我的计划|定投标的|当前净值（元）/);
+  assert.match(investmentPage, /className="trade-actions"/);
+  assert.match(investmentPage, /className="trade-operation"/);
+  assert.match(investmentPage, /className="trade-valuation"/);
+  assert.match(investmentPage, /className="trade-details trade-note"/);
+  assert.match(investmentPage, />查看详情<\/button>/);
   assert.match(settingsPage, /我的计划/);
   assert.match(settingsPage, /定投标的/);
   assert.match(settingsPage, /value=\{plan\.stockTarget \|\| ""\}/);
