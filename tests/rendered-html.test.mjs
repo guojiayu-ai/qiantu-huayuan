@@ -128,7 +128,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /估值数据来源/);
   assert.match(page, /估值计算口径/);
   assert.match(page, /偏离计划原因/);
+  assert.match(page, /标的 \/ 账户/);
   assert.match(page, /份额 \/ 成交价/);
+  assert.match(page, /成交估值/);
   assert.match(page, /备注 \/ 偏离/);
   assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
   assert.match(page, /item\.deviationReason/);
