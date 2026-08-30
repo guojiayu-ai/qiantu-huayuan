@@ -151,11 +151,12 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .trade-table th:nth-child(9) { width:6%; }
 .trade-table th, .trade-table td { padding-inline:8px; }
 .trade-table td { overflow:hidden; }
-.trade-table .trade-operation { overflow:visible; white-space:nowrap; }
+.trade-table th.trade-operation { padding-left:7px; padding-right:2px; text-align:left; }
+.trade-table td.trade-operation { padding-left:0; padding-right:2px; overflow:visible; white-space:nowrap; text-align:left; }
 .trade-table .trade-operation .type { padding-inline:7px; }
 .trade-table th.trade-account, .trade-table td.trade-account { padding-left:0; padding-right:2px; text-align:left; white-space:nowrap; }
 .trade-table td.trade-account { font-size:12px; font-weight:750; }
-.trade-table .trade-valuation { text-align:left; }
+.trade-table th.trade-valuation, .trade-table td.trade-valuation { padding-left:0; padding-right:2px; text-align:left; }
 .trade-table .trade-details { max-width:none; white-space:normal; line-height:1.2; overflow-wrap:anywhere; }
 .trade-table .trade-details>span, .trade-table .trade-details small { display:block; overflow:visible; text-overflow:clip; white-space:normal; }
 .trade-table .trade-amount { text-align:left; font-variant-numeric:tabular-nums; }

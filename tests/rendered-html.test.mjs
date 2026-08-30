@@ -147,6 +147,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:17%; \}/);
   assert.match(styles, /\.trade-table th\.trade-account, \.trade-table td\.trade-account \{ padding-left:0; padding-right:2px; text-align:left; white-space:nowrap; \}/);
   assert.match(styles, /\.trade-table td\.trade-account \{ font-size:12px; font-weight:750; \}/);
+  assert.match(styles, /\.trade-table th\.trade-operation \{ padding-left:7px; padding-right:2px; text-align:left; \}/);
+  assert.match(styles, /\.trade-table td\.trade-operation \{ padding-left:0; padding-right:2px; overflow:visible; white-space:nowrap; text-align:left; \}/);
+  assert.match(styles, /\.trade-table th\.trade-valuation, \.trade-table td\.trade-valuation \{ padding-left:0; padding-right:2px; text-align:left; \}/);
   assert.match(page, /估值数据来源: i\.valuationSource/);
   assert.match(page, /实际支出/);
   assert.doesNotMatch(page, /7956|8259|4827/);
