@@ -139,6 +139,10 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .history-month { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:10px; font-weight:750; white-space:nowrap; }
 .history-month input { width:126px; height:30px; padding:0 7px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:10px; }
 .floating-history-month { position:absolute; top:69px; right:16px; z-index:3; }
+.investment-filter { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:10px; font-weight:750; white-space:nowrap; }
+.investment-filter button { height:30px; padding:0 11px; border:1px solid var(--line); border-radius:999px; background:#fff; color:var(--ink); font:inherit; cursor:pointer; }
+.investment-filter button.active { border-color:var(--ink); background:var(--ink); color:#fff; }
+.investment-filter input { width:126px; height:30px; padding:0 7px; border:1px solid var(--line); border-radius:8px; background:#fff; font-size:10px; }
 .invest-panel>.panel-head>p { visibility:hidden; }
 .text-button { border:0; border-bottom:1px solid currentColor; background:transparent; padding:2px 0; color:#4f4944; font-size:11px; font-weight:800; }
 .batch-box { display:grid; grid-template-columns:1fr 210px; gap:9px; margin-top:8px; padding:9px; border:1px solid var(--line); border-radius:12px; background:#fff; }

@@ -81,7 +81,11 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /收入、支出和投资交易都会自动计入所选账户/);
   assert.match(page, /className="history-month"/);
   assert.doesNotMatch(page, /className="nav-right"><label>.*type="month"/);
-  assert.match(page, /if \(next === "定投"\) setMonth\(currentMonth\)/);
+  assert.doesNotMatch(page, /if \(next === "定投"\) setMonth\(currentMonth\)/);
+  assert.match(page, /const \[investmentMonth, setInvestmentMonth\] = useState\(""\)/);
+  assert.match(page, /investmentMonth \? investments\.filter\(\(item\) => item\.date\.startsWith\(investmentMonth\)\) : investments/);
+  assert.match(page, /onClick=\{\(\) => setInvestmentMonth\(""\)\}>全部/);
+  assert.match(page, /aria-label="筛选定投月份"/);
   assert.doesNotMatch(page, /latestInvestment\.date\.slice/);
   assert.match(page, /定投标的/);
   assert.match(page, /支持添加多只/);
@@ -98,6 +102,8 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.doesNotMatch(investmentPage, /我的计划|定投标的|当前净值（元）/);
   assert.match(settingsPage, /我的计划/);
   assert.match(settingsPage, /定投标的/);
+  assert.match(settingsPage, /value=\{plan\.stockTarget \|\| ""\}/);
+  assert.match(settingsPage, /value=\{plan\.maxDrawdown \|\| ""\}/);
   assert.match(settingsPage, /className="settings-row settings-row-full plan-row"/);
   assert.match(settingsPage, /className="settings-row settings-row-full fund-row"/);
   assert.match(settingsPage, /className="settings-row management-row"/);
