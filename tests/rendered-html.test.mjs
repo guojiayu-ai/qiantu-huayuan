@@ -70,12 +70,15 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.doesNotMatch(page, /const income = monthFlows/);
   assert.doesNotMatch(page, /const investmentCashflow = monthInvestments/);
   assert.match(page, /accountNetFlows/);
+  assert.match(page, /investmentAccountEffect/);
+  assert.match(page, /asOfTodayInvestments\.forEach/);
   assert.match(page, /currentBalance: Number\(account\.balance \|\| 0\) \+ \(accountNetFlows\.get\(account\.id!\) \|\| 0\)/);
   assert.match(page, /const totalAssets = bankTotal \+ fundMarketValue/);
   assert.match(page, /各账户当前余额 \+ 基金当前市值/);
   assert.match(page, /不受收支月份影响/);
   assert.match(page, /当前净值（元）/);
   assert.match(page, /未来日期记录不会提前计入/);
+  assert.match(page, /收入、支出和投资交易都会自动计入所选账户/);
   assert.match(page, /className="history-month"/);
   assert.doesNotMatch(page, /className="nav-right"><label>.*type="month"/);
   assert.match(page, /if \(next === "定投"\) setMonth\(currentMonth\)/);

@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { investmentAccountEffect } from "@/lib/finance.mjs";
 
 type FlowType = "收入" | "支出";
 type InvestType = "买入" | "卖出" | "分红" | "费用";
@@ -123,6 +124,7 @@ export default function Home() {
   const income = dashboardMonthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
   const expense = dashboardMonthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
   const asOfTodayFlows = useMemo(() => flows.filter((item) => item.date <= today), [flows]);
+  const asOfTodayInvestments = useMemo(() => investments.filter((item) => item.date <= today), [investments]);
   const cumulativeNetFlow = asOfTodayFlows.reduce((sum, item) => sum + (item.type === "收入" ? Number(item.amount) : -Number(item.amount)), 0);
   const accountNetFlows = useMemo(() => {
     const totals = new Map<string, number>();
@@ -131,8 +133,13 @@ export default function Home() {
       if (!matched) return;
       totals.set(matched.id!, (totals.get(matched.id!) || 0) + (flow.type === "收入" ? Number(flow.amount) : -Number(flow.amount)));
     });
+    asOfTodayInvestments.forEach((item) => {
+      const matched = normalizedAccounts.find((account) => account.id === item.accountId);
+      if (!matched) return;
+      totals.set(matched.id!, (totals.get(matched.id!) || 0) + investmentAccountEffect(item));
+    });
     return totals;
-  }, [asOfTodayFlows, normalizedAccounts]);
+  }, [asOfTodayFlows, asOfTodayInvestments, normalizedAccounts]);
   const currentAccounts = useMemo(() => normalizedAccounts.map((account) => ({ ...account, currentBalance: Number(account.balance || 0) + (accountNetFlows.get(account.id!) || 0) })), [normalizedAccounts, accountNetFlows]);
   const investmentCashflow = dashboardMonthInvestments.reduce((sum, item) => {
     if (item.type === "卖出") return sum + item.amount - item.fee;
@@ -140,7 +147,6 @@ export default function Home() {
     if (item.type === "买入") return sum - item.amount - item.fee;
     return sum - item.amount;
   }, 0);
-  const asOfTodayInvestments = useMemo(() => investments.filter((item) => item.date <= today), [investments]);
   const holdings = useMemo(() => funds.map((fund) => {
     const fundTrades = asOfTodayInvestments.filter((item) => item.fundId === fund.id);
     const units = fundTrades.reduce((sum, item) => sum + (item.type === "买入" ? item.units : item.type === "卖出" ? -item.units : 0), 0);
@@ -270,11 +276,12 @@ export default function Home() {
     setEditingFlowId(null);
   }
   function addInvestment(event: FormEvent) {
-    event.preventDefault(); const amount = Number(investAmount); const units = Number(investUnits || 0); const fund = funds.find((item) => item.id === investFund); if (!fund || !amount || amount <= 0) return;
+    event.preventDefault(); const amount = Number(investAmount); const units = Number(investUnits || 0); const fee = Number(investFee || 0); const fund = funds.find((item) => item.id === investFund); if (!fund || !amount || amount <= 0 || fee < 0) return;
     if ((investType === "买入" || investType === "卖出") && units <= 0) { alert("买入或卖出必须填写大于 0 的份额"); return; }
+    if (investType === "卖出" && fee > amount) { alert("卖出手续费不能大于成交金额"); return; }
     const ownedUnits = investments.filter((item) => item.fundId === fund.id && item.id !== editingInvestmentId).reduce((sum, item) => sum + (item.type === "买入" ? item.units : item.type === "卖出" ? -item.units : 0), 0);
     if (investType === "卖出" && units > ownedUnits) { alert(`最多可卖出 ${ownedUnits.toFixed(4)} 份`); return; }
-    const next = { id: editingInvestmentId || uid("invest"), date: investDate, type: investType, fundId: fund.id, fundName: fund.name, fundCode: fund.code, amount, units, price: Number(investPrice || 0), fee: Number(investFee || 0), valuation: investValuation.trim(), rule: investRule.trim(), accountId: investAccount, note: investNote.trim() } as Investment;
+    const next = { id: editingInvestmentId || uid("invest"), date: investDate, type: investType, fundId: fund.id, fundName: fund.name, fundCode: fund.code, amount, units, price: Number(investPrice || 0), fee, valuation: investValuation.trim(), rule: investRule.trim(), accountId: investAccount, note: investNote.trim() } as Investment;
     const duplicate = investments.some((item) => item.id !== editingInvestmentId && item.date === next.date && item.type === next.type && item.fundId === next.fundId && item.accountId === next.accountId && item.amount === next.amount && item.units === next.units);
     if (duplicate) { alert("这笔定投记录已经存在，没有重复添加"); return; }
     setInvestments(editingInvestmentId ? investments.map((item) => item.id === editingInvestmentId ? next : item) : [next, ...investments]);
@@ -382,7 +389,7 @@ export default function Home() {
         {tab === "资产" && <div className="tab-panel asset-panel">
           <div className="panel-head"><div><span>04</span><h2>截至今天的资产</h2></div><div className="panel-actions"><p>北京时间 {today.replaceAll("-", "/")} 快照 · 不受收支月份影响</p><button className="text-button" onClick={() => setAccountFormOpen(!accountFormOpen)}>{accountFormOpen ? "取消添加" : "+ 添加账户"}</button></div></div>
           {accountFormOpen && <form className="mini-form asset-add-form" onSubmit={addAccount}><input aria-label="账户名称" placeholder="如：浦发银行" value={newAccountName} onChange={(e) => setNewAccountName(e.target.value)} required autoFocus /><input aria-label="银行卡尾号" placeholder="尾号（可不填）" value={newAccountTail} onChange={(e) => setNewAccountTail(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={8} /><input aria-label="开始记账时的人民币余额" type="number" min="0" step="0.01" placeholder="起始余额" value={newAccountBalance} onChange={(e) => setNewAccountBalance(e.target.value)} /><button type="submit">确认添加</button></form>}
-          <div className="asset-note">账户填写开始记账时的余额；此后收入和支出会自动计入所选账户及总资产。基金按截至今天持有份额 × 当前净值计算，未来日期记录不会提前计入。</div>
+          <div className="asset-note">账户填写开始记账时的余额；此后收入、支出和投资交易都会自动计入所选账户。基金按截至今天持有份额 × 当前净值计算，未来日期记录不会提前计入。</div>
           <div className="account-grid">{currentAccounts.map((item) => <article className={`account ${item.tone} ${!item.active ? "muted-row" : ""}`} key={item.id}><div><strong>{item.name}</strong><span>{item.tail ? `尾号 ${item.tail}` : "现金账户"}</span></div><div className="account-current"><span>当前余额</span><strong>{currency.format(item.currentBalance)}</strong></div><label className="account-base"><span>初始余额</span><input aria-label={`${item.name}开始记账时的人民币余额`} type="number" min="0" step="0.01" value={item.balance || ""} placeholder="0.00" onChange={(e) => setAccounts(normalizedAccounts.map((account) => account.id === item.id ? { ...account, balance: Math.max(0, Number(e.target.value)) } : account))} /></label></article>)}</div>
           <div className="holding-grid">{holdings.map((item) => <article key={item.id}><div><strong>{item.name}</strong><span>{item.code || "无代码"} · {item.units.toFixed(4)} 份</span></div><label className="holding-price"><span>当前净值（元）</span><input aria-label={`${item.name}当前净值`} type="number" min="0" step="0.0001" value={item.currentPrice || ""} placeholder="0.0000" onChange={(e) => setFunds(funds.map((fund) => fund.id === item.id ? { ...fund, currentPrice: Math.max(0, Number(e.target.value)) } : fund))} /></label><strong>{currency.format(item.marketValue)}</strong><small>{item.priceIsEstimated ? "暂按最近成交价计算 · " : ""}累计净投入 {currency.format(item.invested)}</small></article>)}</div>
           <label className="market-value"><span>其他理财当前市值（人民币）</span><div><span>¥</span><input type="number" min="0" step="0.01" value={otherInvestmentValue || ""} placeholder="0.00" onChange={(e) => setOtherInvestmentValue(Math.max(0, Number(e.target.value)))} /></div></label>
