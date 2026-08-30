@@ -34,6 +34,7 @@ test("server-renders the RMB finance tracker", async () => {
   assert.match(html, /日期（北京时间）/);
   assert.match(html, /金额（人民币元）/);
   assert.match(html, /导出完整 CSV/);
+  assert.match(html, /导入备份/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
 
@@ -50,6 +51,7 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /http:\/\/127\.0\.0\.1:43128\/v1\/state/);
   assert.match(page, /http:\/\/localhost:3000/);
   assert.match(page, /本机已同步/);
+  assert.match(page, /完整记录从第一笔起长期保存，另留最近 30 份恢复快照；无需每月导出/);
   assert.match(page, /TIME_ZONE = "Asia\/Shanghai"/);
   assert.match(page, /CURRENCY_CODE = "CNY"/);
   assert.match(page, /\+ 添加账户/);

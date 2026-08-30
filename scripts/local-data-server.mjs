@@ -1,13 +1,45 @@
 import { createServer } from "node:http";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { constants } from "node:fs";
+import { copyFile, mkdir, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
+import { basename, dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const host = process.env.MONEY_GARDEN_HOST || "127.0.0.1";
 const port = Number(process.env.MONEY_GARDEN_PORT || 43128);
 const dataFile = resolve(process.env.MONEY_GARDEN_DATA_FILE || resolve(projectRoot, ".local-data/money-garden.json"));
+const backupDirectory = resolve(dirname(dataFile), "backups");
+const backupStem = basename(dataFile, extname(dataFile));
+const backupRetentionDays = 30;
 const maxBytes = 2 * 1024 * 1024;
+
+function beijingDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+async function createDailyBackup() {
+  await mkdir(backupDirectory, { recursive: true, mode: 0o700 });
+  const destination = resolve(backupDirectory, `${backupStem}-${beijingDate()}.json`);
+  try {
+    await copyFile(dataFile, destination, constants.COPYFILE_EXCL);
+  } catch (error) {
+    if (error?.code === "EEXIST") return true;
+    if (error?.code === "ENOENT") return false;
+    throw error;
+  }
+
+  const backups = (await readdir(backupDirectory))
+    .filter((name) => name.startsWith(`${backupStem}-`) && name.endsWith(".json"))
+    .sort()
+    .reverse();
+  await Promise.all(backups.slice(backupRetentionDays).map((name) => unlink(resolve(backupDirectory, name))));
+  return true;
+}
 
 function localOrigin(origin = "") {
   return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
@@ -42,9 +74,11 @@ async function saveState(data) {
   const previous = await loadState();
   const next = { revision: Number(previous.revision || 0) + 1, updatedAt: new Date().toISOString(), data };
   await mkdir(dirname(dataFile), { recursive: true, mode: 0o700 });
+  const backedUpExistingState = await createDailyBackup();
   const temporary = `${dataFile}.${process.pid}.tmp`;
   await writeFile(temporary, JSON.stringify(next, null, 2), { encoding: "utf8", mode: 0o600 });
   await rename(temporary, dataFile);
+  if (!backedUpExistingState) await createDailyBackup();
   return next;
 }
 

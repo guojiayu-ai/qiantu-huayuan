@@ -398,7 +398,7 @@ export default function Home() {
   const assetShare = (value: number) => compositionTotal > 0 ? Math.max(0, value) / compositionTotal * 100 : 0;
 
   return <main className="app-shell">
-    <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span><span className={`privacy-badge sync-${syncStatus}`} title={syncStatus === "browser-only" ? "线上地址的数据只保存在当前浏览器" : "本机地址使用这台电脑上的同一份数据"}>{syncLabel} · 北京时间 · 人民币</span></div><div className="nav-right"><button onClick={exportFullCsv}>导出完整 CSV</button></div></header>
+    <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span><span className={`privacy-badge sync-${syncStatus}`} title={syncStatus === "browser-only" ? "线上地址的数据只保存在当前浏览器" : "本机地址使用这台电脑上的同一份数据"}>{syncLabel} · 北京时间 · 人民币</span></div><div className="nav-right"><button className="soft-button nav-import" onClick={() => fileRef.current?.click()}>导入备份</button><button onClick={exportFullCsv}>导出完整 CSV</button><input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importJson} /></div></header>
     <div className="dashboard">
       <aside className="side-summary">
         <div className="summary-heading"><div><p className="kicker">MONEY DASHBOARD</p><h1>我的资产</h1></div><span>截至今天</span></div>
@@ -467,7 +467,7 @@ export default function Home() {
                 <div className="chip-list category-chip-list">{categories.filter((item) => item.type === newCategoryType).map((item) => <span className="category-chip-wrap" key={item.id}><button type="button" className={item.active ? `chip ${newCategoryType === "收入" ? "income-chip" : "expense-chip"}` : "chip"} onClick={() => setCategories(categories.map((categoryItem) => categoryItem.id === item.id ? { ...categoryItem, active: !categoryItem.active } : categoryItem))}>{item.name}</button><button type="button" className="category-delete" aria-label={`删除分类${item.name}`} title="删除分类" onClick={() => deleteCategory(item)}>×</button></span>)}</div>
               </section>
           </div>
-          <section className="settings-card backup-card"><h3>本机备份</h3><p>{syncStatus === "browser-only" ? <>线上地址仅保存当前浏览器；跨浏览器请打开 <strong>http://localhost:3000</strong>。</> : <><strong>{syncLabel}</strong> · 跨浏览器统一打开 <strong>http://localhost:3000</strong>。</>} CSV 完整导出，JSON 可恢复。</p><div><button onClick={exportFullCsv}>导出完整 CSV</button><button className="soft-button" onClick={exportJson}>备份 JSON</button><button className="soft-button" onClick={() => fileRef.current?.click()}>恢复 JSON</button><input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importJson} /></div></section>
+          <section className="settings-card backup-card"><h3>保存与迁移</h3><p>{syncStatus === "browser-only" ? <>完整记录会从第一笔起长期保存在当前浏览器；换浏览器或电脑时，可用 JSON <strong>导入恢复</strong>。</> : <><strong>{syncLabel}</strong> · <strong>http://localhost:3000</strong> 跨浏览器共用；完整记录从第一笔起长期保存，另留最近 30 份恢复快照；无需每月导出。</>}</p><div><button onClick={exportFullCsv}>导出 CSV</button><button className="soft-button" onClick={exportJson}>备份 JSON</button><button className="soft-button" onClick={() => fileRef.current?.click()}>导入备份</button></div></section>
         </div></div>}
       </section>
     </div>

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -34,6 +34,14 @@ test("shares one private local file between local browser origins", async (t) =>
   const loaded = await fetch(endpoint, { headers: { origin: "http://127.0.0.1:3000" } });
   assert.deepEqual((await loaded.json()).data.accounts, [{ name: "测试账户" }]);
   assert.match(await readFile(dataFile, "utf8"), /测试账户/);
+  const backupFiles = await readdir(join(folder, "backups"));
+  assert.equal(backupFiles.length, 1);
+  assert.match(backupFiles[0], /^state-\d{4}-\d{2}-\d{2}\.json$/);
+  assert.match(await readFile(join(folder, "backups", backupFiles[0]), "utf8"), /测试账户/);
+
+  await fetch(endpoint, { method: "PUT", headers: { "content-type": "application/json", origin: "http://localhost:3000" }, body: JSON.stringify({ accounts: [{ name: "第二次修改" }] }) });
+  assert.equal((await readdir(join(folder, "backups"))).length, 1, "only one automatic backup is kept per Beijing day");
+  assert.match(await readFile(join(folder, "backups", backupFiles[0]), "utf8"), /测试账户/);
 
   const rejected = await fetch(endpoint, { headers: { origin: "https://example.com" } });
   assert.equal(rejected.status, 403);
