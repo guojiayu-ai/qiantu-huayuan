@@ -98,6 +98,7 @@ export default function Home() {
   const [investNote, setInvestNote] = useState("");
   const [investAccount, setInvestAccount] = useState("");
   const [editingInvestmentId, setEditingInvestmentId] = useState<Investment["id"] | null>(null);
+  const [valuationDetail, setValuationDetail] = useState<Investment | null>(null);
   const [undoItem, setUndoItem] = useState<{ kind: "flow"; item: Flow } | { kind: "investment"; item: Investment } | null>(null);
   const [newAccountName, setNewAccountName] = useState("");
   const [newAccountTail, setNewAccountTail] = useState("");
@@ -250,6 +251,12 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!activeFunds.some((item) => item.id === investFund) && activeFunds[0]) setInvestFund(activeFunds[0].id);
   }, [activeFunds, investFund]);
+  useEffect(() => {
+    if (!valuationDetail) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setValuationDetail(null); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [valuationDetail]);
   useEffect(() => {
     if (!legacyInvestments.length || investments.length || localStorage.getItem("money-ledger-invest-v3-migrated")) return;
     const productNames = [...new Set(legacyInvestments.map((item) => String(item.product || "未命名基金")))];
@@ -419,10 +426,10 @@ export default function Home() {
             <label>触发规则<input value={investRule} onChange={(e) => setInvestRule(e.target.value)} placeholder="如月度基准" /></label>
             <label>偏离计划原因<input value={investDeviationReason} onChange={(e) => setInvestDeviationReason(e.target.value)} placeholder="按计划可不填" /></label>
             <label>备注<input value={investNote} onChange={(e) => setInvestNote(e.target.value)} placeholder="可不填" /></label>
-            <button disabled={!activeFunds.length || !activeAccounts.length}>{editingInvestmentId ? "保存修改" : "记录执行"}</button>
-            {editingInvestmentId && <button type="button" className="soft-button" onClick={() => { setEditingInvestmentId(null); setInvestAmount(""); setInvestUnits(""); setInvestPrice(""); setInvestFee(""); setInvestValuation(""); setInvestValuationSource(""); setInvestValuationBasis(""); setInvestRule(""); setInvestDeviationReason(""); setInvestNote(""); }}>取消</button>}
+            <button className="trade-submit" disabled={!activeFunds.length || !activeAccounts.length}>{editingInvestmentId ? "保存修改" : "记录执行"}</button>
+            {editingInvestmentId && <button type="button" className="soft-button trade-cancel" onClick={() => { setEditingInvestmentId(null); setInvestAmount(""); setInvestUnits(""); setInvestPrice(""); setInvestFee(""); setInvestValuation(""); setInvestValuationSource(""); setInvestValuationBasis(""); setInvestRule(""); setInvestDeviationReason(""); setInvestNote(""); }}>取消</button>}
           </form>
-          <div className="table-wrap trade-table"><table><thead><tr><th>日期</th><th>操作</th><th>基金 / 代码</th><th>账户</th><th className="number">份额 / 成交价</th><th>估值记录</th><th className="number">成交金额</th><th>备注 / 偏离</th><th /></tr></thead><tbody>{visibleInvestments.length ? visibleInvestments.map((item) => <tr key={item.id}><td>{item.date}</td><td><span className={`type invest-${item.type}`}>{item.type}</span></td><td>{item.fundName}<small>{item.fundCode || "无代码"}</small></td><td>{resolveAccount(item)}</td><td className="number">{item.units ? `${item.units} 份` : "—"}<small>成交价 {item.price ? currency.format(item.price) : "—"}</small></td><td className="trade-details">{item.valuation || "未记录"}<small title={`来源：${item.valuationSource || "未填写"} · 口径：${item.valuationBasis || "未填写"} · 规则：${item.rule || "未填写"}`}>来源：{item.valuationSource || "未填写"} · 口径：{item.valuationBasis || "未填写"} · 规则：{item.rule || "未填写"}</small></td><td className="number">{currency.format(item.amount)}<small>手续费 {currency.format(item.fee)} · {item.type === "买入" ? `实际支出 ${currency.format(item.amount + item.fee)}` : item.type === "卖出" ? `实际到账 ${currency.format(Math.max(0, item.amount - item.fee))}` : item.type === "分红" ? `实际到账 ${currency.format(item.amount)}` : `实际支出 ${currency.format(item.amount)}`}</small></td><td className="trade-details">{item.note || "—"}<small>{item.deviationReason ? `偏离：${item.deviationReason}` : "按计划执行"}</small></td><td><div className="row-actions"><button onClick={() => editInvestment(item)}>编辑</button><button className="delete" onClick={() => deleteInvestment(item)}>删除</button></div></td></tr>) : <tr><td className="no-data" colSpan={9}>{investmentMonth ? "该月暂无定投执行记录" : "暂无定投执行记录"}</td></tr>}</tbody></table></div></div>}
+          <div className="table-wrap trade-table"><table><thead><tr><th>日期</th><th>操作</th><th>基金 / 代码</th><th>账户</th><th className="number">份额 / 成交价</th><th>估值记录</th><th className="trade-amount">成交金额</th><th>备注 / 偏离</th><th /></tr></thead><tbody>{visibleInvestments.length ? visibleInvestments.map((item) => <tr key={item.id}><td>{item.date}</td><td><span className={`type invest-${item.type}`}>{item.type}</span></td><td>{item.fundName}<small>{item.fundCode || "无代码"}</small></td><td>{resolveAccount(item)}</td><td className="number">{item.units ? `${item.units} 份` : "—"}<small>成交价 {item.price ? currency.format(item.price) : "—"}</small></td><td><button type="button" className="detail-button" onClick={() => setValuationDetail(item)}>查看详情</button></td><td className="trade-amount">{currency.format(item.amount)}<small>手续费 {currency.format(item.fee)} · {item.type === "买入" ? `实际支出 ${currency.format(item.amount + item.fee)}` : item.type === "卖出" ? `实际到账 ${currency.format(Math.max(0, item.amount - item.fee))}` : item.type === "分红" ? `实际到账 ${currency.format(item.amount)}` : `实际支出 ${currency.format(item.amount)}`}</small></td><td className="trade-details">{item.note || "—"}<small>{item.deviationReason ? `偏离：${item.deviationReason}` : "按计划执行"}</small></td><td><div className="row-actions"><button onClick={() => editInvestment(item)}>编辑</button><button className="delete" onClick={() => deleteInvestment(item)}>删除</button></div></td></tr>) : <tr><td className="no-data" colSpan={9}>{investmentMonth ? "该月暂无定投执行记录" : "暂无定投执行记录"}</td></tr>}</tbody></table></div></div>}
         {tab === "资产" && <div className="tab-panel asset-panel">
           <div className="panel-head"><div><span>04</span><h2>截至今天的资产</h2></div><div className="panel-actions"><p>北京时间 {today.replaceAll("-", "/")} 快照 · 不受收支月份影响</p><button className="text-button" onClick={() => setAccountFormOpen(!accountFormOpen)}>{accountFormOpen ? "取消添加" : "+ 添加账户"}</button></div></div>
           {accountFormOpen && <form className="mini-form asset-add-form" onSubmit={addAccount}><input aria-label="账户名称" placeholder="如：浦发银行" value={newAccountName} onChange={(e) => setNewAccountName(e.target.value)} required autoFocus /><input aria-label="银行卡尾号" placeholder="尾号（可不填）" value={newAccountTail} onChange={(e) => setNewAccountTail(e.target.value.replace(/\D/g, ""))} inputMode="numeric" maxLength={8} /><input aria-label="开始记账时的人民币余额" type="number" min="0" step="0.01" placeholder="起始余额" value={newAccountBalance} onChange={(e) => setNewAccountBalance(e.target.value)} /><button type="submit">确认添加</button></form>}
@@ -462,6 +469,17 @@ export default function Home() {
         </div></div>}
       </section>
     </div>
+    {valuationDetail && <div className="modal-backdrop">
+      <section className="valuation-modal" role="dialog" aria-modal="true" aria-labelledby="valuation-modal-title">
+        <header><div><span>估值记录</span><h3 id="valuation-modal-title">{valuationDetail.fundName}</h3><small>{valuationDetail.date} · {valuationDetail.fundCode || "无代码"}</small></div><button type="button" aria-label="关闭估值详情" onClick={() => setValuationDetail(null)}>×</button></header>
+        <dl>
+          <div><dt>成交时指数估值</dt><dd>{valuationDetail.valuation || "未记录"}</dd></div>
+          <div><dt>估值数据来源</dt><dd>{valuationDetail.valuationSource || "未填写"}</dd></div>
+          <div><dt>估值计算口径</dt><dd>{valuationDetail.valuationBasis || "未填写"}</dd></div>
+          <div><dt>触发规则</dt><dd>{valuationDetail.rule || "未填写"}</dd></div>
+        </dl>
+      </section>
+    </div>}
     {undoItem && <div className="undo-toast" role="status"><span>已删除 1 条记录</span><button onClick={undoDelete}>撤销</button><button aria-label="关闭" onClick={() => setUndoItem(null)}>×</button></div>}
   </main>;
 }

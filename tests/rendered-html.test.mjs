@@ -130,6 +130,11 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /偏离计划原因/);
   assert.match(page, /份额 \/ 成交价/);
   assert.match(page, /备注 \/ 偏离/);
+  assert.match(page, /className="trade-amount">成交金额/);
+  assert.match(page, /className="detail-button"/);
+  assert.match(page, />查看详情<\/button>/);
+  assert.match(page, /role="dialog"/);
+  assert.match(page, /aria-label="关闭估值详情"/);
   assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
   assert.match(page, /item\.deviationReason/);
   assert.match(page, /估值数据来源: i\.valuationSource/);
