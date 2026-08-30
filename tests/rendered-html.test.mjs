@@ -38,8 +38,9 @@ test("server-renders the RMB finance tracker", async () => {
 });
 
 test("keeps financial data device-local with explicit locale metadata", async () => {
-  const [page, hosting] = await Promise.all([
+  const [page, styles, hosting] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
   ]);
   const hostingConfig = JSON.parse(hosting);
@@ -142,6 +143,9 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /aria-label="关闭估值详情"/);
   assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
   assert.match(page, /item\.deviationReason/);
+  assert.match(styles, /\.trade-table th:nth-child\(4\) \{ width:8%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:17%; \}/);
+  assert.match(styles, /\.trade-table \.trade-account \{ padding-left:4px; padding-right:2px; text-align:left; \}/);
   assert.match(page, /估值数据来源: i\.valuationSource/);
   assert.match(page, /实际支出/);
   assert.doesNotMatch(page, /7956|8259|4827/);
