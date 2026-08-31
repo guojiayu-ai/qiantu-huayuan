@@ -147,8 +147,14 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(page, /item\.price \? currency\.format\(item\.price\)/);
   assert.match(page, /item\.deviationReason/);
   assert.match(styles, /\.trade-table th:nth-child\(4\) \{ width:11%; \}/);
-  assert.match(styles, /\.trade-table th:nth-child\(7\) \{ width:8%; \}/);
-  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:16%; \}/);
+  assert.match(styles, /\.dashboard \{ height:calc\(100% - 64px\); padding:18px 22px; display:grid; grid-template-columns:292px minmax\(0,1fr\); gap:18px; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(1\) \{ width:10%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(7\) \{ width:6%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:15%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(10\) \{ width:8%; \}/);
+  assert.match(styles, /\.trade-table th:first-child, \.trade-table td:first-child \{ padding-left:14px; \}/);
+  assert.match(styles, /\.trade-table th\.trade-note, \.trade-table td\.trade-note \{ padding-left:10px; \}/);
+  assert.match(styles, /\.trade-table th:last-child, \.trade-table td:last-child \{ padding-left:10px; padding-right:10px; \}/);
   assert.match(styles, /\.trade-table th\.trade-account, \.trade-table td\.trade-account \{ padding-left:0; padding-right:2px; text-align:left; white-space:nowrap; \}/);
   assert.match(styles, /\.trade-table td\.trade-account \{ font-size:12px; font-weight:750; \}/);
   assert.match(styles, /\.trade-table th\.trade-units, \.trade-table td\.trade-units,/);
