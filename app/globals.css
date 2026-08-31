@@ -143,13 +143,13 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .trade-table table { width:100%; min-width:0; table-layout:fixed; }
 .trade-table th:nth-child(1) { width:10%; }
 .trade-table th:nth-child(2) { width:6%; }
-.trade-table th:nth-child(3) { width:12%; }
+.trade-table th:nth-child(3) { width:15%; }
 .trade-table th:nth-child(4) { width:11%; }
 .trade-table th:nth-child(5) { width:7%; }
 .trade-table th:nth-child(6) { width:8%; }
 .trade-table th:nth-child(7) { width:6%; }
 .trade-table th:nth-child(8) { width:11%; }
-.trade-table th:nth-child(9) { width:20%; }
+.trade-table th:nth-child(9) { width:17%; }
 .trade-table th:nth-child(10) { width:8%; }
 .trade-table th, .trade-table td { padding-inline:6px; }
 .trade-table td { overflow:hidden; }
@@ -157,6 +157,7 @@ tfoot td { background:#fbf8f3; font-weight:700; border-bottom:0; }
 .trade-table th.trade-operation { padding-left:7px; padding-right:2px; text-align:left; }
 .trade-table td.trade-operation { padding-left:0; padding-right:2px; overflow:visible; white-space:nowrap; text-align:left; }
 .trade-table .trade-operation .type { padding-inline:7px; }
+.trade-table th.trade-fund, .trade-table td.trade-fund { padding-right:10px; white-space:normal; line-height:1.2; overflow-wrap:anywhere; }
 .trade-table th.trade-account, .trade-table td.trade-account { padding-left:0; padding-right:2px; text-align:left; white-space:nowrap; }
 .trade-table td.trade-account { font-size:12px; font-weight:750; }
 .trade-table th.trade-units, .trade-table td.trade-units,
