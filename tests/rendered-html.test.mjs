@@ -150,7 +150,8 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(styles, /\.dashboard \{ height:calc\(100% - 64px\); padding:18px 22px; display:grid; grid-template-columns:292px minmax\(0,1fr\); gap:18px; \}/);
   assert.match(styles, /\.trade-table th:nth-child\(1\) \{ width:10%; \}/);
   assert.match(styles, /\.trade-table th:nth-child\(7\) \{ width:6%; \}/);
-  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:15%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(8\) \{ width:11%; \}/);
+  assert.match(styles, /\.trade-table th:nth-child\(9\) \{ width:20%; \}/);
   assert.match(styles, /\.trade-table th:nth-child\(10\) \{ width:8%; \}/);
   assert.match(styles, /\.trade-table th:first-child, \.trade-table td:first-child \{ padding-left:14px; \}/);
   assert.match(styles, /\.trade-table th\.trade-note, \.trade-table td\.trade-note \{ padding-left:10px; \}/);
@@ -162,6 +163,8 @@ test("keeps financial data device-local with explicit locale metadata", async ()
   assert.match(styles, /\.trade-table th\.trade-operation \{ padding-left:7px; padding-right:2px; text-align:left; \}/);
   assert.match(styles, /\.trade-table td\.trade-operation \{ padding-left:0; padding-right:2px; overflow:visible; white-space:nowrap; text-align:left; \}/);
   assert.match(styles, /\.trade-table th\.trade-valuation, \.trade-table td\.trade-valuation \{ padding-left:0; padding-right:2px; text-align:left; \}/);
+  assert.match(page, /className="trade-settlement"/);
+  assert.match(page, /<small>手续费 \{currency\.format\(item\.fee\)\}<\/small><\/td><td className="trade-details trade-note">/);
   assert.match(page, /估值数据来源: i\.valuationSource/);
   assert.match(page, /实际支出/);
   assert.doesNotMatch(page, /7956|8259|4827/);
