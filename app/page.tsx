@@ -2,14 +2,14 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { investmentAccountEffect } from "@/lib/finance.mjs";
+import { amountOnlyInvestmentValueEffect, investmentAccountEffect, newestFirst, supportsAmountOnlyTrades } from "@/lib/finance.mjs";
 
 type FlowType = "收入" | "支出";
 type InvestType = "买入" | "卖出" | "分红" | "费用";
 type Tab = "收入" | "支出" | "定投" | "资产" | "设置";
 type Account = { id?: string; name: string; tail: string; balance: number; tone?: string; color?: string; active?: boolean };
 type Category = { id: string; name: string; type: FlowType; active: boolean };
-type Flow = { id: string | number; date: string; type: FlowType; category: string; accountId?: string; account?: string; amount: number; note: string };
+type Flow = { id: string | number; date: string; type: FlowType; category: string; accountId?: string; account?: string; amount: number; note: string; transferId?: string };
 type Investment = { id: string | number; date: string; type: InvestType; fundId: string; fundName: string; fundCode: string; amount: number; units: number; price: number; fee: number; valuation: string; valuationSource?: string; valuationBasis?: string; rule: string; deviationReason?: string; accountId: string; note: string };
 type LegacyInvestment = { id?: string | number; date?: string; type?: InvestType; product?: string; amount?: number; note?: string };
 type FundPlan = { id: string; name: string; code: string; role: string; valuationMethod: string; baseAmount: number; targetAllocation: number; currentPrice: number; active: boolean };
@@ -47,6 +47,7 @@ const initialPlan: InvestPlan = { goal: "长期个人财富积累", targetAmount
 function uid(prefix: string) { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`; }
 function accountId(account: Account) { return account.id || `${account.name}-${account.tail}`; }
 function accountLabel(account: Account) { return `${account.name}${account.tail ? ` · ${account.tail}` : ""}`; }
+function isInternalTransfer(flow: Flow) { return Boolean(flow.transferId); }
 
 function useLocalState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(initial);
@@ -122,15 +123,15 @@ export default function Home() {
   })), [accounts]);
   const activeAccounts = normalizedAccounts.filter((item) => item.active);
   const activeFunds = funds.filter((item) => item.active);
+  const selectedInvestFund = funds.find((item) => item.id === investFund);
   const monthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(month)), [flows, month]);
-  const visibleInvestments = useMemo(() => investmentMonth ? investments.filter((item) => item.date.startsWith(investmentMonth)) : investments, [investments, investmentMonth]);
+  const visibleInvestments = useMemo(() => newestFirst(investmentMonth ? investments.filter((item) => item.date.startsWith(investmentMonth)) : investments), [investments, investmentMonth]);
   const dashboardMonthFlows = useMemo(() => flows.filter((item) => item.date.startsWith(dashboardMonth)), [flows, dashboardMonth]);
   const dashboardMonthInvestments = useMemo(() => investments.filter((item) => item.date.startsWith(dashboardMonth)), [investments, dashboardMonth]);
-  const income = dashboardMonthFlows.filter((item) => item.type === "收入").reduce((sum, item) => sum + Number(item.amount), 0);
-  const expense = dashboardMonthFlows.filter((item) => item.type === "支出").reduce((sum, item) => sum + Number(item.amount), 0);
+  const income = dashboardMonthFlows.filter((item) => item.type === "收入" && !isInternalTransfer(item)).reduce((sum, item) => sum + Number(item.amount), 0);
+  const expense = dashboardMonthFlows.filter((item) => item.type === "支出" && !isInternalTransfer(item)).reduce((sum, item) => sum + Number(item.amount), 0);
   const asOfTodayFlows = useMemo(() => flows.filter((item) => item.date <= today), [flows]);
   const asOfTodayInvestments = useMemo(() => investments.filter((item) => item.date <= today), [investments]);
-  const cumulativeNetFlow = asOfTodayFlows.reduce((sum, item) => sum + (item.type === "收入" ? Number(item.amount) : -Number(item.amount)), 0);
   const accountNetFlows = useMemo(() => {
     const totals = new Map<string, number>();
     asOfTodayFlows.forEach((flow) => {
@@ -287,14 +288,19 @@ export default function Home() {
   }
   function addInvestment(event: FormEvent) {
     event.preventDefault(); const amount = Number(investAmount); const units = Number(investUnits || 0); const fee = Number(investFee || 0); const fund = funds.find((item) => item.id === investFund); if (!fund || !amount || amount <= 0 || fee < 0) return;
-    if ((investType === "买入" || investType === "卖出") && units <= 0) { alert("买入或卖出必须填写大于 0 的份额"); return; }
+    const amountOnlyTrade = supportsAmountOnlyTrades(fund);
+    if (!amountOnlyTrade && (investType === "买入" || investType === "卖出") && units <= 0) { alert("买入或卖出必须填写大于 0 的份额"); return; }
     if (investType === "卖出" && fee > amount) { alert("卖出手续费不能大于成交金额"); return; }
     const ownedUnits = investments.filter((item) => item.fundId === fund.id && item.id !== editingInvestmentId).reduce((sum, item) => sum + (item.type === "买入" ? item.units : item.type === "卖出" ? -item.units : 0), 0);
-    if (investType === "卖出" && units > ownedUnits) { alert(`最多可卖出 ${ownedUnits.toFixed(4)} 份`); return; }
+    if (!amountOnlyTrade && investType === "卖出" && units > ownedUnits) { alert(`最多可卖出 ${ownedUnits.toFixed(4)} 份`); return; }
     const next = { id: editingInvestmentId || uid("invest"), date: investDate, type: investType, fundId: fund.id, fundName: fund.name, fundCode: fund.code, amount, units, price: Number(investPrice || 0), fee, valuation: investValuation.trim(), valuationSource: investValuationSource.trim(), valuationBasis: investValuationBasis.trim(), rule: investRule.trim(), deviationReason: investDeviationReason.trim(), accountId: investAccount, note: investNote.trim() } as Investment;
     const duplicate = investments.some((item) => item.id !== editingInvestmentId && item.date === next.date && item.type === next.type && item.fundId === next.fundId && item.accountId === next.accountId && item.amount === next.amount && item.units === next.units);
     if (duplicate) { alert("这笔定投记录已经存在，没有重复添加"); return; }
+    const previous = investments.find((item) => item.id === editingInvestmentId);
+    const previousFund = previous ? funds.find((item) => item.id === previous.fundId) : undefined;
+    const marketValueDelta = amountOnlyInvestmentValueEffect(next, fund) - amountOnlyInvestmentValueEffect(previous, previousFund);
     setInvestments(editingInvestmentId ? investments.map((item) => item.id === editingInvestmentId ? next : item) : [next, ...investments]);
+    if (marketValueDelta) setOtherInvestmentValue((current) => Math.max(0, Number(current || 0) + marketValueDelta));
     setMonth(next.date.slice(0, 7));
     setInvestAmount(""); setInvestUnits(""); setInvestPrice(""); setInvestFee(""); setInvestValuation(""); setInvestValuationSource(""); setInvestValuationBasis(""); setInvestRule(""); setInvestDeviationReason(""); setInvestNote("");
     setEditingInvestmentId(null);
@@ -341,10 +347,22 @@ export default function Home() {
     setInvestDate(item.date); setInvestType(item.type); setInvestFund(item.fundId); setInvestAccount(item.accountId); setInvestAmount(String(item.amount)); setInvestUnits(item.units ? String(item.units) : ""); setInvestPrice(item.price ? String(item.price) : ""); setInvestFee(item.fee ? String(item.fee) : ""); setInvestValuation(item.valuation); setInvestValuationSource(item.valuationSource || ""); setInvestValuationBasis(item.valuationBasis || ""); setInvestRule(item.rule); setInvestDeviationReason(item.deviationReason || ""); setInvestNote(item.note); setEditingInvestmentId(item.id);
   }
   function deleteFlow(item: Flow) { setFlows(flows.filter((entry) => entry.id !== item.id)); setUndoItem({ kind: "flow", item }); }
-  function deleteInvestment(item: Investment) { setInvestments(investments.filter((entry) => entry.id !== item.id)); setUndoItem({ kind: "investment", item }); }
+  function deleteInvestment(item: Investment) {
+    const fund = funds.find((entry) => entry.id === item.fundId);
+    const marketValueDelta = -amountOnlyInvestmentValueEffect(item, fund);
+    setInvestments(investments.filter((entry) => entry.id !== item.id));
+    if (marketValueDelta) setOtherInvestmentValue((current) => Math.max(0, Number(current || 0) + marketValueDelta));
+    setUndoItem({ kind: "investment", item });
+  }
   function undoDelete() {
     if (!undoItem) return;
-    if (undoItem.kind === "flow") setFlows([undoItem.item, ...flows]); else setInvestments([undoItem.item, ...investments]);
+    if (undoItem.kind === "flow") setFlows([undoItem.item, ...flows]);
+    else {
+      const fund = funds.find((entry) => entry.id === undoItem.item.fundId);
+      const marketValueDelta = amountOnlyInvestmentValueEffect(undoItem.item, fund);
+      setInvestments([undoItem.item, ...investments]);
+      if (marketValueDelta) setOtherInvestmentValue((current) => Math.max(0, Number(current || 0) + marketValueDelta));
+    }
     setUndoItem(null);
   }
   function importBatch(type: FlowType) {
@@ -401,11 +419,10 @@ export default function Home() {
     <header className="simple-nav"><div><strong>钱途花园</strong><span>个人资产记录</span><span className={`privacy-badge sync-${syncStatus}`} title={syncStatus === "browser-only" ? "线上地址的数据只保存在当前浏览器" : "本机地址使用这台电脑上的同一份数据"}>{syncLabel} · 北京时间 · 人民币</span></div><div className="nav-right"><button className="soft-button nav-import" onClick={() => fileRef.current?.click()}>导入备份</button><button onClick={exportFullCsv}>导出完整 CSV</button><input ref={fileRef} type="file" accept="application/json,.json" hidden onChange={importJson} /></div></header>
     <div className="dashboard">
       <aside className="side-summary">
-        <div className="summary-heading"><div><p className="kicker">MONEY DASHBOARD</p><h1>我的资产</h1></div><span>截至今天</span></div>
+        <div className="summary-heading"><p className="kicker">MONEY DASHBOARD</p><span>截至今天</span></div>
         <article className="total-card"><span>人民币总资产</span><strong>{currency.format(totalAssets)}</strong><div className="total-breakdown"><span>银行卡<b>{currency.format(bankTotal)}</b></span><span>基金<b>{currency.format(fundMarketValue)}</b></span><span>其他<b>{currency.format(otherInvestmentValue)}</b></span></div></article>
         <section className="monthly-dashboard"><header><div><span>月度现金流</span><small>收支和投资分开统计</small></div><label className="dashboard-month"><span>看板月份</span><input aria-label="看板月份" type="month" value={dashboardMonth} onChange={(event) => { if (event.target.value) setDashboardMonth(event.target.value); }} /></label></header><div className="side-metrics"><div><span>收入</span><strong className="positive">{currency.format(income)}</strong></div><div><span>支出</span><strong className="negative">{currency.format(expense)}</strong></div><div><span>日常净结余</span><strong className={dailyNet >= 0 ? "positive" : "negative"}>{signedMoney(dailyNet)}</strong></div><div><span>投资现金流</span><strong className={investmentCashflow >= 0 ? "positive" : "negative"}>{signedMoney(investmentCashflow)}</strong></div></div><div className="cash-change"><span>当月净现金变化</span><strong className={totalCashChange >= 0 ? "positive" : "negative"}>{signedMoney(totalCashChange)}</strong></div></section>
         <section className="asset-mix"><header><span>资产分布</span><small>截至今天</small></header><div className="mix-bar" aria-label="资产分布"><i className="mix-bank" style={{ width: `${assetShare(bankTotal)}%` }} /><i className="mix-fund" style={{ width: `${assetShare(fundMarketValue)}%` }} /><i className="mix-other" style={{ width: `${assetShare(otherInvestmentValue)}%` }} /></div><div className="mix-legend"><span><i className="mix-bank" />银行卡<b>{assetShare(bankTotal).toFixed(0)}%</b></span><span><i className="mix-fund" />基金<b>{assetShare(fundMarketValue).toFixed(0)}%</b></span><span><i className="mix-other" />其他<b>{assetShare(otherInvestmentValue).toFixed(0)}%</b></span></div></section>
-        <section className="asset-context"><span>资产口径</span><p>初始余额 + 截至今天的全部收支 + 基金当前市值</p><small>累计收支 {signedMoney(cumulativeNetFlow)}</small></section>
       </aside>
       <section className="workspace"><nav className="tabs">{(["收入", "支出", "定投", "资产", "设置"] as const).map((item) => <button className={tab === item ? "active" : ""} onClick={() => changeTab(item)} key={item}>{item}</button>)}</nav>
         {tab === "定投" && <div className="investment-filter floating-history-month"><span>记录范围</span><button type="button" className={!investmentMonth ? "active" : ""} onClick={() => setInvestmentMonth("")}>全部</button><input aria-label="筛选定投月份" type="month" value={investmentMonth} onChange={(event) => setInvestmentMonth(event.target.value)} /></div>}
@@ -417,7 +434,7 @@ export default function Home() {
             <label>基金 / ETF<select value={investFund} onChange={(e) => setInvestFund(e.target.value)}>{activeFunds.map((fund) => <option value={fund.id} key={fund.id}>{fund.name}{fund.code ? ` · ${fund.code}` : ""}</option>)}</select></label>
             <label>账户<select value={investAccount} onChange={(e) => setInvestAccount(e.target.value)}>{activeAccounts.map((account) => <option value={account.id} key={account.id}>{accountLabel(account)}</option>)}</select></label>
             <label>{investType === "买入" || investType === "卖出" ? "成交金额（不含手续费）" : investType === "分红" ? "到账金额（元）" : "费用金额（元）"}<input type="number" step="0.01" min="0.01" value={investAmount} onChange={(e) => setInvestAmount(e.target.value)} required /></label>
-            <label>份额<input type="number" step="0.0001" min="0" value={investUnits} onChange={(e) => setInvestUnits(e.target.value)} required={investType === "买入" || investType === "卖出"} /></label>
+            <label>{supportsAmountOnlyTrades(selectedInvestFund) ? "份额（可不填）" : "份额"}<input type="number" step="0.0001" min="0" value={investUnits} placeholder={supportsAmountOnlyTrades(selectedInvestFund) ? "按金额交易可留空" : undefined} onChange={(e) => setInvestUnits(e.target.value)} required={!supportsAmountOnlyTrades(selectedInvestFund) && (investType === "买入" || investType === "卖出")} /></label>
             <label>成交价（元）<input type="number" step="0.0001" min="0" value={investPrice} onChange={(e) => setInvestPrice(e.target.value)} /></label>
             <label>交易手续费（元）<input type="number" step="0.01" min="0" value={investFee} onChange={(e) => setInvestFee(e.target.value)} placeholder="没有则填 0" /></label>
             <label>成交时指数估值<input value={investValuation} onChange={(e) => setInvestValuation(e.target.value)} placeholder="如 PE 12.3" /></label>
